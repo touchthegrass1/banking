@@ -1,0 +1,1174 @@
+openapi: 3.0.3
+info:
+  contact:
+    email: apiteam@swagger.io
+  description: Banking simulation application
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger banking api simulation - OpenAPI 3.0
+  version: 1.0.11
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+- url: https://banking-by-popov-vasilii.swagger.io/
+tags:
+- description: banking clients
+  externalDocs:
+    description: Find out more
+    url: http://swagger.io
+  name: client
+- description: banking cards
+  externalDocs:
+    description: Find out more about our store
+    url: http://swagger.io
+  name: card
+- description: banking contracts
+  name: contract
+- description: banking credits
+  name: credit
+- description: banking payment schedules
+  name: payment schedule
+- description: banking transactions
+  name: transaction
+paths:
+  /api/v1/clients/{inn}:
+    get:
+      operationId: getClient
+      parameters:
+      - description: inn of client to update
+        explode: false
+        in: path
+        name: inn
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+          description: "Successful, client retrieved"
+        "400":
+          description: Invalid inn supplied
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          description: Client not found
+        "405":
+          description: Validation exception
+      security:
+      - bearerAuth: []
+      summary: get client by inn
+      tags:
+      - client
+    put:
+      description: Update an existing client by Id
+      operationId: updateClient
+      parameters:
+      - description: inn of client to update
+        explode: false
+        in: path
+        name: inn
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/ClientUpdate'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+          description: Successful operation
+        "400":
+          description: Invalid inn supplied
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          description: Client not found
+        "405":
+          description: Validation exception
+      security:
+      - bearerAuth: []
+      summary: Update an existing client
+      tags:
+      - client
+  /api/v1/clients:
+    post:
+      description: Add a new client
+      operationId: addClient
+      requestBody:
+        $ref: '#/components/requestBodies/Client'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+          description: Successful operation
+        "405":
+          description: Validation exception
+      security:
+      - bearerAuth: []
+      summary: Add a new client
+      tags:
+      - client
+  /api/v1/clients/transfer/:
+    post:
+      operationId: transferMoney
+      requestBody:
+        $ref: '#/components/requestBodies/Transfer'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+          description: successful
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "405":
+          description: Validation exception
+      security:
+      - bearerAuth: []
+      summary: Transfer money to another client
+      tags:
+      - client
+  /api/v1/clients/withdraw/:
+    post:
+      operationId: withdrawMoney
+      requestBody:
+        $ref: '#/components/requestBodies/Withdraw'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+          description: successful
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "405":
+          description: Validation exception
+      security:
+      - bearerAuth: []
+      summary: Withdraw money from client
+      tags:
+      - client
+  /api/v1/clients/deposit/:
+    post:
+      operationId: depositMoney
+      requestBody:
+        $ref: '#/components/requestBodies/Deposit'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+          description: successful
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "405":
+          description: Validation exception
+      security:
+      - bearerAuth: []
+      summary: Deposit money on client card
+      tags:
+      - client
+  /api/v1/token/:
+    post:
+      description: Get a jwt token by providing phone and password
+      operationId: getJWT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientLogin'
+        description: Provide phone and password
+        required: true
+      responses:
+        "200":
+          content:
+            application/jwt:
+              schema:
+                type: string
+          description: Successful operation
+        "401":
+          description: Wrong password or login
+      summary: Get a jwt token by providing phone and password
+      tags:
+      - client
+  /api/v1/cards:
+    post:
+      description: Add a new card
+      operationId: addCard
+      requestBody:
+        $ref: '#/components/requestBodies/Card'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+          description: Successful operation
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "405":
+          description: Validation exception
+      security:
+      - bearerAuth: []
+      summary: Add a new card
+      tags:
+      - card
+  /api/v1/cards/{number}:
+    delete:
+      operationId: deleteCard
+      parameters:
+      - description: card's number to get
+        explode: false
+        in: path
+        name: number
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Successfuly deleted
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "400":
+          description: Invalid card number supplied
+        "405":
+          description: Validation exception
+      summary: delete card by number
+      tags:
+      - card
+    get:
+      operationId: getCard
+      parameters:
+      - description: card's number to get
+        explode: false
+        in: path
+        name: number
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+          description: "Successful, card retrieved"
+        "400":
+          description: Invalid card number supplied
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          description: Card not found
+        "405":
+          description: Validation exception
+      security:
+      - bearerAuth: []
+      summary: get card by number
+      tags:
+      - card
+    put:
+      description: Update an existing client by Id
+      operationId: updateCard
+      parameters:
+      - description: client's card number to update
+        explode: false
+        in: path
+        name: number
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/CardUpdate'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+          description: Successful operation
+        "400":
+          description: Invalid inn supplied
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          description: Client not found
+        "405":
+          description: Validation exception
+      security:
+      - bearerAuth: []
+      summary: Update an existing card
+      tags:
+      - card
+  /api/v1/contracts/:
+    get:
+      operationId: getContracts
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Contract'
+                type: array
+          description: Successful get
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          description: nothing here
+      security:
+      - bearerAuth: []
+      summary: Get client's contracts
+      tags:
+      - contract
+    post:
+      description: Add a new contract
+      operationId: addContract
+      requestBody:
+        $ref: '#/components/requestBodies/Contract'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+          description: Successful operation
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "405":
+          description: Invalid input
+      security:
+      - bearerAuth: []
+      summary: Add a new contract
+      tags:
+      - contract
+  /api/v1/contracts/{contractId}:
+    get:
+      operationId: getContract
+      parameters:
+      - description: cotract id
+        explode: false
+        in: path
+        name: contractId
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+          description: Successful get
+        "400":
+          description: Invalid contractId supplied
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          description: Contract not found
+      summary: Get client's contract by id
+      tags:
+      - contract
+  /api/v1/credits/:
+    get:
+      operationId: getCredits
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Credit'
+                type: array
+          description: Successful get
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          description: nothing here
+      summary: Get client's credits
+      tags:
+      - credit
+    post:
+      operationId: addCredit
+      requestBody:
+        $ref: '#/components/requestBodies/Credit'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Credit'
+          description: Successful operation
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "405":
+          description: Invalid input
+      security:
+      - bearerAuth: []
+      summary: Create new credit
+      tags:
+      - credit
+  /api/v1/credits/{creditId}:
+    get:
+      operationId: getCredit
+      parameters:
+      - description: creditId to get credit
+        explode: false
+        in: path
+        name: creditId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Credit'
+          description: "Successful, credit retrieved"
+        "400":
+          description: Invalid card number supplied
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          description: Card not found
+        "405":
+          description: Validation exception
+      security:
+      - bearerAuth: []
+      summary: get credit by id
+      tags:
+      - credit
+  /api/v1/credit/payment_schedules/:
+    get:
+      operationId: getPaymentSchedules
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/PaymentSchedule'
+                type: array
+          description: Successful get
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          description: nothing here
+      security:
+      - bearerAuth: []
+      summary: Get client's credit payment schedules
+      tags:
+      - payment schedule
+  /api/v1/credit/payment_schedules/{paymentScheduleId}/:
+    get:
+      operationId: getPaymentSchedule
+      parameters:
+      - description: paymentScheduleId to get payment schedule
+        explode: false
+        in: path
+        name: paymentScheduleId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentSchedule'
+          description: "Successful, payment schedule retrieved"
+        "400":
+          description: Invalid payment schedule id supplied
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          description: Payment Schedule not found
+        "405":
+          description: Validation exception
+      security:
+      - bearerAuth: []
+      summary: get payment schedule by id
+      tags:
+      - payment schedule
+  /api/v1/transactions/:
+    get:
+      operationId: getTransactions
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+          description: Successful transactions retrieved
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          description: nothing here
+      security:
+      - bearerAuth: []
+      summary: get client's transactions
+      tags:
+      - transaction
+  /api/v1/transactions/{transactionId}/:
+    get:
+      operationId: getTransaction
+      parameters:
+      - description: transaction id to get transaction
+        explode: false
+        in: path
+        name: transactionId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+          description: "Successful, transaction retrieved"
+        "400":
+          description: Invalid transaction id supplied
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          description: Transaction not found
+        "405":
+          description: Validation exception
+      security:
+      - bearerAuth: []
+      summary: get transaction by id
+      tags:
+      - transaction
+components:
+  requestBodies:
+    Client:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClientCreateAndUpdate'
+      description: client create
+    ClientLogin:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClientLogin'
+      description: client login
+    ClientUpdate:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClientCreateAndUpdate'
+      description: client update
+    Card:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardCreate'
+      description: card create
+    CardUpdate:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardUpdate'
+      description: card update
+    Contract:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ContractCreate'
+      description: contract create
+    Credit:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreditCreate'
+      description: credit create
+    Transfer:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Transfer'
+      description: transfer money from one card to another
+    Deposit:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Deposit'
+      description: deposit money to card
+    Withdraw:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Withdraw'
+      description: withdraw money from card
+  responses:
+    UnauthorizedError:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unauthorized
+  schemas:
+    Client:
+      example:
+        ogrn: "11001001010101"
+        clientId: 10
+        clientType: jp
+        phone: "89371231231"
+        residentialAddress: "Russia, Moscow, Pushkina street 4"
+        name: Vasilii Popov
+        inn: "10438143012042"
+        kpp: "348031201201210"
+        registrationAddress: "Russia, Moscow, Lev Tolstoy street 5"
+      properties:
+        clientId:
+          example: 10
+          format: int64
+          type: integer
+        name:
+          description: Client full name
+          example: Vasilii Popov
+          type: string
+        phone:
+          example: "89371231231"
+          type: string
+        registrationAddress:
+          description: Client registration address
+          example: "Russia, Moscow, Lev Tolstoy street 5"
+          type: string
+        residentialAddress:
+          example: "Russia, Moscow, Pushkina street 4"
+          type: string
+        clientType:
+          enum:
+          - jp
+          - individual
+          - ie
+          example: jp
+          type: string
+        ogrn:
+          description: Main State registration number
+          example: "11001001010101"
+          type: string
+        inn:
+          description: unique taxpayer identification number
+          example: "10438143012042"
+          type: string
+        kpp:
+          description: complements the inn
+          example: "348031201201210"
+          type: string
+      type: object
+    ClientCreateAndUpdate:
+      example:
+        ogrn: "11001001010101"
+        clientType: jp
+        phone: "89371231231"
+        residentialAddress: "Russia, Moscow, Pushkina street 4"
+        name: Vasilii Popov
+        inn: "10438143012042"
+        kpp: "348031201201210"
+        registrationAddress: "Russia, Moscow, Lev Tolstoy street 5"
+      properties:
+        name:
+          description: Client full name
+          example: Vasilii Popov
+          type: string
+        phone:
+          example: "89371231231"
+          type: string
+        registrationAddress:
+          description: Client registration address
+          example: "Russia, Moscow, Lev Tolstoy street 5"
+          type: string
+        residentialAddress:
+          example: "Russia, Moscow, Pushkina street 4"
+          type: string
+        clientType:
+          enum:
+          - jp
+          - individual
+          - ie
+          example: jp
+          type: string
+        ogrn:
+          description: Main State registration number
+          example: "11001001010101"
+          type: string
+        inn:
+          description: unique taxpayer identification number
+          example: "10438143012042"
+          type: string
+        kpp:
+          description: complements the inn
+          example: "348031201201210"
+          type: string
+      type: object
+    ClientLogin:
+      example:
+        password: myhardpassword
+        phone: "80183102001"
+      properties:
+        phone:
+          example: "80183102001"
+          type: string
+        password:
+          example: myhardpassword
+          type: string
+      type: object
+    Card:
+      example:
+        clientId: 3
+        balance: 10.0
+        cardId: 10
+        cardType: credit
+        cvcCode: "010"
+        currency: RUB
+        validTo: 2017-07-21T17:32:28Z
+      properties:
+        cardId:
+          example: 10
+          format: int64
+          type: integer
+        balance:
+          example: 10.0
+          format: double
+          type: number
+        validTo:
+          example: 2017-07-21T17:32:28Z
+          format: datetime
+          type: string
+        cvcCode:
+          example: "010"
+          type: string
+        cardType:
+          enum:
+          - debit
+          - credit
+          example: credit
+          type: string
+        currency:
+          example: RUB
+          type: string
+        clientId:
+          example: 3
+          format: int64
+          type: integer
+      type: object
+    CardUpdate:
+      example:
+        cvcCode: "010"
+        validTo: 2017-07-21T17:32:28Z
+      properties:
+        validTo:
+          example: 2017-07-21T17:32:28Z
+          format: datetime
+          type: string
+        cvcCode:
+          example: "010"
+          type: string
+      type: object
+    CardCreate:
+      example:
+        clientId: 3
+        balance: 10.0
+        cardType: credit
+        cvcCode: "010"
+        currency: RUB
+        validTo: 2017-07-21T17:32:28Z
+      properties:
+        balance:
+          example: 10.0
+          format: double
+          type: number
+        validTo:
+          example: 2017-07-21T17:32:28Z
+          format: datetime
+          type: string
+        cvcCode:
+          example: "010"
+          type: string
+        cardType:
+          enum:
+          - debit
+          - credit
+          example: credit
+          type: string
+        currency:
+          example: RUB
+          type: string
+        clientId:
+          example: 3
+          format: int64
+          type: integer
+      type: object
+    Contract:
+      example:
+        clientIt: 3
+        contractType: loan_agreement
+        conclusionDate: 2017-07-21T17:32:28Z
+        contractId: 1
+        contractContent: Blah blah
+      properties:
+        contractId:
+          example: 1
+          format: int64
+          type: integer
+        contractType:
+          enum:
+          - loan_agreement
+          - bank_account_agreement
+          - settlement_and_cash_service_agreement
+          example: loan_agreement
+          type: string
+        conclusionDate:
+          example: 2017-07-21T17:32:28Z
+          format: datetime
+          type: string
+        contractContent:
+          example: Blah blah
+          type: string
+        clientIt:
+          example: 3
+          format: int64
+          type: integer
+      type: object
+    ContractCreate:
+      example:
+        clientIt: 3
+        contractType: loan_agreement
+        conclusionDate: 2017-07-21T17:32:28Z
+        contractContent: Blah blah
+      properties:
+        contractType:
+          enum:
+          - loan_agreement
+          - bank_account_agreement
+          - settlement_and_cash_service_agreement
+          example: loan_agreement
+          type: string
+        conclusionDate:
+          example: 2017-07-21T17:32:28Z
+          format: datetime
+          type: string
+        contractContent:
+          example: Blah blah
+          type: string
+        clientIt:
+          example: 3
+          format: int64
+          type: integer
+      type: object
+    Credit:
+      example:
+        creditId: 1
+        summ: 1000.0
+        endDate: 2017-07-21T17:32:28Z
+        conclusionDate: 2017-07-21T17:32:28Z
+        contractId: 3
+        percent: 13.5
+      properties:
+        creditId:
+          example: 1
+          format: int64
+          type: integer
+        summ:
+          example: 1000.0
+          format: double
+          type: number
+        percent:
+          example: 13.5
+          format: double
+          type: number
+        conclusionDate:
+          example: 2017-07-21T17:32:28Z
+          format: datetime
+          type: string
+        endDate:
+          example: 2017-07-21T17:32:28Z
+          format: datetime
+          type: string
+        contractId:
+          example: 3
+          format: int64
+          type: integer
+      type: object
+    CreditCreate:
+      example:
+        summ: 1000.0
+        endDate: 2017-07-21T17:32:28Z
+        conclusionDate: 2017-07-21T17:32:28Z
+        contractId: 3
+        percent: 13.5
+      properties:
+        summ:
+          example: 1000.0
+          format: double
+          type: number
+        percent:
+          example: 13.5
+          format: double
+          type: number
+        conclusionDate:
+          example: 2017-07-21T17:32:28Z
+          format: datetime
+          type: string
+        endDate:
+          example: 2017-07-21T17:32:28Z
+          format: datetime
+          type: string
+        contractId:
+          example: 3
+          format: int64
+          type: integer
+      type: object
+    PaymentSchedule:
+      example:
+        totalSum: 1000.0
+        dateBegin: 2017-07-21T17:32:28Z
+        paymentScheduleId: 1
+        contractId: 3
+        currency: RUB
+        repaymentOfInterestSum: 1000.0
+        sumRepaymentLoanPart: 1000.0
+        dateEnd: 2017-07-21T17:32:28Z
+        commision: 0.5
+      properties:
+        paymentScheduleId:
+          example: 1
+          format: int64
+          type: integer
+        totalSum:
+          example: 1000.0
+          format: double
+          type: number
+        currency:
+          example: RUB
+          type: string
+        commision:
+          example: 0.5
+          format: double
+          type: number
+        repaymentOfInterestSum:
+          example: 1000.0
+          format: double
+          type: number
+        sumRepaymentLoanPart:
+          example: 1000.0
+          format: double
+          type: number
+        dateBegin:
+          example: 2017-07-21T17:32:28Z
+          format: datetime
+          type: string
+        dateEnd:
+          example: 2017-07-21T17:32:28Z
+          format: datetime
+          type: string
+        contractId:
+          example: 3
+          format: int64
+          type: integer
+      type: object
+    Transaction:
+      example:
+        transactionType: deposit
+        transactionDatetime: 2017-07-21T17:32:28Z
+        summ: 1000.0
+        cardId: "1000000055555556"
+        cardIdFrom: "1000000055555555"
+        cardIdTo: "1000000055555555"
+        transactionId: 1
+      properties:
+        transactionId:
+          example: 1
+          format: int64
+          type: integer
+        transactionType:
+          enum:
+          - deposit
+          - withdraw
+          - transfer
+          example: deposit
+          type: string
+        cardIdFrom:
+          example: "1000000055555555"
+          type: string
+        cardIdTo:
+          example: "1000000055555555"
+          type: string
+        cardId:
+          example: "1000000055555556"
+          type: string
+        summ:
+          example: 1000.0
+          format: double
+          type: number
+        transactionDatetime:
+          example: 2017-07-21T17:32:28Z
+          format: datetime
+          type: string
+      type: object
+    Deposit:
+      example:
+        summ: 1000.0
+        cardId: "1000000055555555"
+      properties:
+        cardId:
+          example: "1000000055555555"
+          type: string
+        summ:
+          example: 1000.0
+          format: double
+          type: number
+      type: object
+    Withdraw:
+      example:
+        summ: 1000.0
+        cardId: "1000000055555555"
+      properties:
+        cardId:
+          example: "1000000055555555"
+          type: string
+        summ:
+          example: 1000.0
+          format: double
+          type: number
+      type: object
+    Transfer:
+      example:
+        summ: 1000.0
+        cardIdFrom: "1000000055555555"
+        cardIdTo: "1000000055555556"
+      properties:
+        cardIdFrom:
+          example: "1000000055555555"
+          type: string
+        cardIdTo:
+          example: "1000000055555556"
+          type: string
+        summ:
+          example: 1000.0
+          format: double
+          type: number
+      type: object
+    Error:
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - message
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http

@@ -1,0 +1,181 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+                   logicalFilePath="dev/version/0.2.0/db.changelog.020.django_compatibility.xml">
+    <preConditions onFail="WARN">
+        <sqlCheck expectedResult="0">select 0</sqlCheck>
+    </preConditions>
+    <changeSet author="vasilii" id="1">
+        <dropIndex indexName="client_phone_idx" schemaName="banking" tableName="client"/>
+    </changeSet>
+    <changeSet author="vasilii" id="2">
+        <addUniqueConstraint constraintName="client_phone_key" schemaName="banking" tableName="client" disabled="false"
+                             columnNames="phone"/>
+    </changeSet>
+    <changeSet author="vasilii" id="3">
+        <sql dbms="postgresql" endDelimiter=";">ALTER TABLE banking.client SET SCHEMA public;</sql>
+        <rollback>ALTER TABLE public.client SET SCHEMA banking;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="4">
+        <sql dbms="postgresql" endDelimiter=";">ALTER TABLE banking.card SET SCHEMA public;</sql>
+        <rollback>ALTER TABLE public.card SET SCHEMA banking;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="5">
+        <sql dbms="postgresql" endDelimiter=";">ALTER TABLE banking.contract SET SCHEMA public;</sql>
+        <rollback>ALTER TABLE public.contract SET SCHEMA banking;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="6">
+        <sql dbms="postgresql" endDelimiter=";">ALTER TABLE banking.credit SET SCHEMA public;</sql>
+        <rollback>ALTER TABLE public.credit SET SCHEMA banking;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="7">
+        <sql dbms="postgresql" endDelimiter=";">ALTER TABLE banking.payment_schedule SET SCHEMA public;</sql>
+        <rollback>ALTER TABLE public.payment_schedule SET SCHEMA banking;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="8">
+        <sql dbms="postgresql" endDelimiter=";">ALTER TABLE banking.transaction SET SCHEMA public;</sql>
+        <rollback>ALTER TABLE public.transaction SET SCHEMA banking;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="9">
+        <addColumn schemaName="public" tableName="client">
+            <column name="user_id" type="BIGINT"><constraints nullable="false"/></column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="vasilii" id="10">
+        <addForeignKeyConstraint
+                baseColumnNames="user_id"
+                baseTableName="client"
+                baseTableSchemaName="public"
+                constraintName="client_user_id_fkey" deferrable="false"
+                initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE"
+                referencedColumnNames="id" referencedTableName="user"
+                referencedTableSchemaName="public"
+                validate="true"
+        />
+    </changeSet>
+    <changeSet author="vasilii" id="11">
+        <addUniqueConstraint
+                columnNames="user_id"
+                tableName="client"
+                schemaName="public"
+                constraintName="client_user_id_key" deferrable="false"
+                initiallyDeferred="false"
+                validate="true"
+        />
+    </changeSet>
+    <changeSet author="vasilii" id="12">
+        <dropIndex indexName="client_inn_idx"
+                   schemaName="public"
+                   tableName="client"/>
+    </changeSet>
+    <changeSet author="vasilii" id="13">
+        <dropIndex indexName="client_ogrn_idx"
+                   schemaName="public"
+                   tableName="client"/>
+    </changeSet>
+    <changeSet author="vasilii" id="14">
+        <addUniqueConstraint
+                columnNames="inn"
+                tableName="client"
+                schemaName="public"
+                constraintName="client_inn_key" deferrable="false"
+                initiallyDeferred="false"
+                validate="true"/>
+    </changeSet>
+    <changeSet author="vasilii" id="15">
+        <addUniqueConstraint
+                columnNames="ogrn"
+                tableName="client"
+                schemaName="public"
+                constraintName="client_ogrn_key" deferrable="false"
+                initiallyDeferred="false"
+                validate="true"/>
+    </changeSet>
+    <changeSet author="vasilii" id="16">
+        <renameColumn
+                columnDataType="int"
+                oldColumnName="card_id_from"
+                newColumnName="card_from_id"
+                schemaName="public"
+                tableName="transaction"/>
+    </changeSet>
+    <changeSet author="vasilii" id="17">
+        <renameColumn
+                columnDataType="int"
+                oldColumnName="card_id_to"
+                newColumnName="card_to_id"
+                schemaName="public"
+                tableName="transaction"/>
+    </changeSet>
+    <changeSet author="vasilii" id="18">
+        <renameColumn
+                columnDataType="numeric"
+                oldColumnName="total_summ"
+                newColumnName="total_sum"
+                schemaName="public"
+                tableName="payment_schedule"/>
+    </changeSet>
+    <changeSet author="vasilii" id="19">
+        <renameColumn
+                columnDataType="numeric"
+                oldColumnName="commision"
+                newColumnName="commission"
+                schemaName="public"
+                tableName="payment_schedule"/>
+    </changeSet>
+    <changeSet author="vasilii" id="20">
+        <renameColumn
+                columnDataType="numeric"
+                oldColumnName="repayment_of_interest_summ"
+                newColumnName="repayment_of_interest_sum"
+                schemaName="public"
+                tableName="payment_schedule"/>
+    </changeSet>
+    <changeSet author="vasilii" id="21">
+        <renameColumn
+                columnDataType="numeric"
+                oldColumnName="summ_repayment_loan_part"
+                newColumnName="sum_repayment_loan_part"
+                schemaName="public"
+                tableName="payment_schedule"/>
+    </changeSet>
+    <changeSet author="vasilii" id="22">
+        <dropColumn
+                schemaName="public"
+                tableName="client">
+            <column name="name"/>
+            <column name="phone"/>
+        </dropColumn>
+    </changeSet>
+    <changeSet author="vasilii" id="23">
+        <modifyDataType columnName="inn" newDataType="VARCHAR(14)" tableName="client" schemaName="public"/>
+    </changeSet>
+    <changeSet author="vasilii" id="24">
+        <modifyDataType columnName="ogrn" newDataType="VARCHAR(14)" tableName="client" schemaName="public"/>
+    </changeSet>
+    <changeSet author="vasilii" id="25">
+        <modifyDataType columnName="kpp" newDataType="VARCHAR(14)" tableName="client" schemaName="public"/>
+    </changeSet>
+    <changeSet author="vasilii" id="26">
+        <sqlFile endDelimiter=";;" path="../../complex_migrations/change_card_id_column_type.sql" relativeToChangelogFile="true" dbms="postgresql" encoding="UTF-8"/>
+        <rollback>SELECT 1;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="27">
+        <sql dbms="postgresql" endDelimiter=";">ALTER TYPE card_type SET SCHEMA public</sql>
+        <rollback>ALTER TYPE card_type SET SCHEMA banking;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="28">
+        <sql dbms="postgresql" endDelimiter=";">ALTER TYPE client_type SET SCHEMA public</sql>
+        <rollback>ALTER TYPE client_type SET SCHEMA banking;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="29">
+        <sql dbms="postgresql" endDelimiter=";">ALTER TYPE contract_type SET SCHEMA public</sql>
+        <rollback>ALTER TYPE contract_type SET SCHEMA banking;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="30">
+        <sql dbms="postgresql" endDelimiter=";">ALTER TYPE transaction_type SET SCHEMA public</sql>
+        <rollback>ALTER TYPE transaction_type SET SCHEMA banking;</rollback>
+    </changeSet>
+</databaseChangeLog>

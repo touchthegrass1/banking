@@ -1,0 +1,37 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd" logicalFilePath="dev/routines/db.routines.000.xml">
+    <changeSet author="vasilii" id="1create_client" runOnChange="true">
+        <createProcedure dbms="postgresql" encoding="utf-8" path="../code/create_client.sql" relativeToChangelogFile="true" schemaName="banking"/>
+        <rollback>DROP PROCEDURE IF EXISTS banking.create_client(varchar, varchar, varchar, varchar, varchar, int, int, int);</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="2create_card" runOnChange="true">
+        <createProcedure dbms="postgresql" encoding="utf-8" path="../code/create_card.sql" relativeToChangelogFile="true" schemaName="banking"/>
+        <rollback>DROP PROCEDURE IF EXISTS banking.create_card(date, varchar, bigint);</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="3deposit_money" runOnChange="true">
+        <createProcedure dbms="postgresql" encoding="utf-8" path="../code/deposit_money.sql" relativeToChangelogFile="true" schemaName="banking"/>
+        <rollback>DROP PROCEDURE IF EXISTS banking.deposit_money(int, decimal);</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="4withdraw_money" runOnChange="true">
+        <createProcedure dbms="postgresql" encoding="utf-8" path="../code/withdraw_money.sql" relativeToChangelogFile="true" schemaName="banking"/>
+        <rollback>DROP PROCEDURE IF EXISTS banking.withdraw_money(int, decimal);</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="5money_transfer" runOnChange="true">
+        <createProcedure dbms="postgresql" encoding="utf-8" path="../code/money_transfer.sql" relativeToChangelogFile="true" schemaName="banking"/>
+        <rollback>DROP PROCEDURE IF EXISTS banking.money_transfer(int, int, decimal);</rollback>
+    </changeSet>
+
+    <changeSet author="vasilii" id="6get_client_by_phone" runOnChange="true">
+        <sqlFile endDelimiter=";;" path="../code/get_client_by_phone.sql" relativeToChangelogFile="true" dbms="postgresql" encoding="UTF-8"/>
+        <rollback>DROP FUNCTION IF EXISTS banking.get_client_by_phone(varchar);</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="7get_client_cards" runOnChange="true">
+        <sqlFile endDelimiter=";;" path="../code/get_client_cards.sql" relativeToChangelogFile="true" dbms="postgresql" encoding="UTF-8"/>
+        <rollback>DROP FUNCTION IF EXISTS banking.get_client_cards(varchar);</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="8truncate_tables" runOnChange="true">
+        <sqlFile endDelimiter=";;" path="../code/truncate_tables.sql" relativeToChangelogFile="true" dbms="postgresql" encoding="utf-8"/>
+        <rollback>DROP FUNCTION IF EXISTS f_truncate_tables</rollback>
+    </changeSet>
+
+</databaseChangeLog>

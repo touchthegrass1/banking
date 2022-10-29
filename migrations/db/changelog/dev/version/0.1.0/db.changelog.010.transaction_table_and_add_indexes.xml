@@ -1,0 +1,117 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+                   logicalFilePath="dev/version/0.1.0/db.changelog.010.transaction_table_and_add_indexes.xml">
+    <changeSet author="vasilii" id="1">
+        <sql dbms="postgresql" endDelimiter=";">
+            CREATE TYPE banking.transaction_type AS ENUM ('deposit', 'withdraw', 'transfer');
+        </sql>
+        <rollback>
+            DROP TYPE banking.transaction_type;
+        </rollback>
+    </changeSet>
+    <changeSet id="2" author="vasilii">
+        <createTable tableName="transaction" schemaName="banking">
+            <column autoIncrement="true" name="transaction_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="transaction_pkey"/>
+            </column>
+            <column name="transaction_type" type="BANKING.TRANSACTION_TYPE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="card_id_from" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="card_id_to" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="card_id" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="summ" type="DECIMAL">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transaction_datetime" type="TIMESTAMP" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="vasilii" id="3">
+        <sql dbms="postgresql" endDelimiter=";">
+            ALTER TABLE "banking"."transaction" ADD CONSTRAINT valid_transaction CHECK(
+            (transaction_type IN ('deposit', 'withdraw') AND card_id IS NOT NULL AND card_id_from IS NULL AND card_id_to
+            IS NULL) OR
+            (transaction_type = 'transfer' AND card_id IS NULL AND card_id_from IS NOT NULL AND card_id_to IS NOT NULL)
+            )
+        </sql>
+        <rollback>
+            ALTER TABLE "banking"."transaction" DROP CONSTRAINT valid_transaction;
+        </rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="4">
+        <sql dbms="postgresql" endDelimiter=";">
+            ALTER TABLE "banking"."card" ADD CONSTRAINT card_valid_balance CHECK ( balance >= 0 )
+        </sql>
+        <rollback>
+            ALTER TABLE "banking"."card" DROP CONSTRAINT card_valid_balance;
+        </rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="5">
+        <addForeignKeyConstraint baseColumnNames="card_id_from" baseTableName="transaction"
+                                 baseTableSchemaName="banking"
+                                 constraintName="transaction_card_id_from_fkey" deferrable="false"
+                                 initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+                                 referencedColumnNames="card_id" referencedTableName="card"
+                                 referencedTableSchemaName="banking" validate="true"/>
+    </changeSet>
+    <changeSet author="vasilii" id="6">
+        <addForeignKeyConstraint baseColumnNames="card_id_to" baseTableName="transaction" baseTableSchemaName="banking"
+                                 constraintName="transaction_card_id_to_fkey" deferrable="false"
+                                 initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+                                 referencedColumnNames="card_id" referencedTableName="card"
+                                 referencedTableSchemaName="banking" validate="true"/>
+    </changeSet>
+    <changeSet author="vasilii" id="7">
+        <addForeignKeyConstraint baseColumnNames="card_id" baseTableName="transaction" baseTableSchemaName="banking"
+                                 constraintName="transaction_card_id_fkey" deferrable="false"
+                                 initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+                                 referencedColumnNames="card_id" referencedTableName="card"
+                                 referencedTableSchemaName="banking" validate="true"/>
+    </changeSet>
+    <changeSet author="vasilii" id="8">
+        <createIndex indexName="payment_schedule_date_begin_idx" schemaName="banking" tableName="payment_schedule">
+            <column name="date_begin"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="vasilii" id="9">
+        <createIndex indexName="payment_schedule_date_end_idx" schemaName="banking" tableName="payment_schedule">
+            <column name="date_end"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="vasilii" id="10">
+        <createIndex indexName="client_phone_idx" schemaName="banking" tableName="client">
+            <column name="phone"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="vasilii" id="11">
+        <createIndex indexName="client_inn_idx" schemaName="banking" tableName="client">
+            <column name="inn"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="vasilii" id="12">
+        <createIndex indexName="client_ogrn_idx" schemaName="banking" tableName="client">
+            <column name="ogrn"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="vasilii" id="13">
+        <createIndex indexName="card_client_id_idx" schemaName="banking" tableName="card">
+            <column name="client_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="vasilii" id="14">
+        <createIndex indexName="transaction_transaction_datetime_idx" schemaName="banking" tableName="transaction">
+            <column name="transaction_datetime"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

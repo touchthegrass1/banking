@@ -1,0 +1,172 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+                   logicalFilePath="dev/version/0.0.0/db.changelog.000.initial.xml">
+    <changeSet author="vasilii" id="1">
+        <sql dbms="postgresql" endDelimiter=";">CREATE SCHEMA banking</sql>
+        <rollback>
+            DROP SCHEMA banking;
+        </rollback>
+    </changeSet>
+
+    <changeSet author="vasilii" id="2">
+        <sql dbms="postgresql" endDelimiter=";">CREATE TYPE banking.client_type AS ENUM('ie', 'individual', 'jp')</sql>
+        <rollback>
+            DROP TYPE banking.client_type;
+        </rollback>
+    </changeSet>
+
+    <changeSet author="vasilii" id="3">
+        <sql dbms="postgresql" endDelimiter=";">CREATE TYPE banking.card_type AS ENUM ('credit', 'debit')</sql>
+        <rollback>
+            DROP TYPE banking.card_type;
+        </rollback>
+    </changeSet>
+
+    <changeSet author="vasilii" id="4">
+        <sql dbms="postgresql" endDelimiter=";">
+            CREATE TYPE banking.contract_type AS ENUM (
+            'loan agreement',
+            'bank account agreement',
+            'settlement and cash service agreement'
+            );
+        </sql>
+        <rollback>
+            DROP TYPE banking.contract_type;
+        </rollback>
+    </changeSet>
+
+    <changeSet author="vasilii (generated)" id="1665412851353-1">
+        <createTable schemaName="banking" tableName="credit">
+            <column autoIncrement="true" name="credit_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="credit_pkey"/>
+            </column>
+            <column name="summ" type="numeric">
+                <constraints nullable="false"/>
+            </column>
+            <column name="percent" type="numeric">
+                <constraints nullable="false"/>
+            </column>
+            <column name="conclusion_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contract_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="vasilii (generated)" id="1665412851353-2">
+        <createTable schemaName="banking" tableName="payment_schedule">
+            <column autoIncrement="true" name="payment_schedule_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="payment_schedule_pkey"/>
+            </column>
+            <column name="total_summ" type="numeric">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="VARCHAR(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="commision" type="numeric">
+                <constraints nullable="false"/>
+            </column>
+            <column name="repayment_of_interest_summ" type="numeric">
+                <constraints nullable="false"/>
+            </column>
+            <column name="summ_repayment_loan_part" type="numeric">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_begin" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_end" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contract_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="vasilii (generated)" id="1665412851353-3">
+        <createTable schemaName="banking" tableName="client">
+            <column autoIncrement="true" name="client_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="client_pkey"/>
+            </column>
+            <column name="name" type="VARCHAR(50)"/>
+            <column name="phone" type="VARCHAR(12)"/>
+            <column name="registration_address" type="VARCHAR(300)"/>
+            <column name="residential_address" type="VARCHAR(300)"/>
+            <column name="client_type" type="CLIENT_TYPE"/>
+            <column name="ogrn" type="INTEGER"/>
+            <column name="inn" type="INTEGER"/>
+            <column name="kpp" type="INTEGER"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="vasilii (generated)" id="1665412851353-4">
+        <createTable schemaName="banking" tableName="card">
+            <column name="card_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="card_pkey"/>
+            </column>
+            <column name="balance" type="numeric">
+                <constraints nullable="false"/>
+            </column>
+            <column name="valid_to" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="cvc_code" type="VARCHAR(3)"/>
+            <column name="card_type" type="CARD_TYPE"/>
+            <column name="currency" type="VARCHAR(3)"/>
+            <column name="client_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="vasilii (generated)" id="1665412851353-5">
+        <createTable schemaName="banking" tableName="contract">
+            <column autoIncrement="true" name="contract_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="contract_pkey"/>
+            </column>
+            <column name="contract_type" type="CONTRACT_TYPE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="conclusion_date" type="date"/>
+            <column name="contract_content" type="TEXT"/>
+            <column name="client_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="vasilii (generated)" id="1665412851353-6">
+        <addUniqueConstraint columnNames="contract_id" constraintName="credit_contract_id_key" schemaName="banking"
+                             tableName="credit"/>
+    </changeSet>
+    <changeSet author="vasilii (generated)" id="1665412851353-7">
+        <createIndex indexName="payment_schedule_contract_id_idx" schemaName="banking" tableName="payment_schedule">
+            <column name="contract_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="vasilii (generated)" id="1665412851353-8">
+        <createIndex indexName="contract_client_id_idx" schemaName="banking" tableName="contract">
+            <column name="client_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="vasilii (generated)" id="1665412851353-9">
+        <addForeignKeyConstraint baseColumnNames="client_id" baseTableName="card" baseTableSchemaName="banking"
+                                 constraintName="card_client_id_fkey" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="NO ACTION" referencedColumnNames="client_id"
+                                 referencedTableName="client" referencedTableSchemaName="banking" validate="true"/>
+    </changeSet>
+    <changeSet author="vasilii (generated)" id="1665412851353-10">
+        <addForeignKeyConstraint baseColumnNames="client_id" baseTableName="contract" baseTableSchemaName="banking"
+                                 constraintName="contract_client_id_fkey" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="NO ACTION" referencedColumnNames="client_id"
+                                 referencedTableName="client" referencedTableSchemaName="banking" validate="true"/>
+    </changeSet>
+    <changeSet author="vasilii (generated)" id="1665412851353-11">
+        <addForeignKeyConstraint baseColumnNames="contract_id" baseTableName="credit" baseTableSchemaName="banking"
+                                 constraintName="credit_contract_id_fkey" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="NO ACTION" referencedColumnNames="contract_id"
+                                 referencedTableName="contract" referencedTableSchemaName="banking" validate="true"/>
+    </changeSet>
+    <changeSet author="vasilii (generated)" id="1665412851353-12">
+        <addForeignKeyConstraint baseColumnNames="contract_id" baseTableName="payment_schedule"
+                                 baseTableSchemaName="banking" constraintName="payment_schedule_contract_id_fkey"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="NO ACTION"
+                                 referencedColumnNames="contract_id" referencedTableName="contract"
+                                 referencedTableSchemaName="banking" validate="true"/>
+    </changeSet>
+</databaseChangeLog>
