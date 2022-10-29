@@ -32,7 +32,7 @@ type User struct {
 	Id          int64
 	Password    string
 	LastLogin   time.Time
-	IsSuperUser bool
+	IsSuperuser bool
 	FirstName   string
 	LastName    string
 	IsStaff     bool

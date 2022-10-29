@@ -1,10 +1,9 @@
-CREATE OR REPLACE FUNCTION banking.get_client_cards(phone VARCHAR) RETURNS banking.card AS $$
+CREATE OR REPLACE FUNCTION public.get_client_cards(phone VARCHAR) RETURNS public.card AS $$
     BEGIN
-        SELECT * FROM banking.card WHERE client_id = (
+        SELECT * FROM public.card WHERE client_id = (
             SELECT client_id
-            FROM banking.client
+            FROM public.client
             WHERE "phone" = $1
         );
     END;
 $$ LANGUAGE plpgsql STABLE STRICT;;
--- rollback DROP FUNCTION IF EXISTS banking.get_client_cards(varchar);

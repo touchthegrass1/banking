@@ -8,28 +8,30 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"gorm.io/plugin/dbresolver"
 )
 
 func InitializeDB() *gorm.DB {
-	logger := utils.ProvideLogger()
+	log := utils.ProvideLogger()
 	dbparams := ProvideDBParams()
-	database, err := ProvideDB(dbparams, logger)
+	gormConfig := ProvideGormConfig()
+	database, err := ProvideDB(dbparams, log, gormConfig)
 	if err != nil {
 		panic(err)
 	}
 	return database
 }
 
-func ProvideDB(dbparams DatabaseParams, logger *zap.Logger) (*gorm.DB, error) {
-	db, err := gorm.Open(postgres.Open(dbparams.MasterConnectionURI), &gorm.Config{})
+func ProvideDB(dbparams DatabaseParams, log *zap.Logger, gormConfig *gorm.Config) (*gorm.DB, error) {
+	db, err := gorm.Open(postgres.Open(dbparams.MasterConnectionURI), gormConfig)
 	replicas := make([]gorm.Dialector, len(dbparams.ReplicasConnectionURIs))
 	for index, value := range dbparams.ReplicasConnectionURIs {
 		replicas[index] = postgres.Open(value)
 	}
 
 	if err != nil {
-		logger.Error("Failed to connect to postgresql using", zap.String("connection uri", dbparams.MasterConnectionURI))
+		log.Error("Failed to connect to postgresql using", zap.String("connection uri", dbparams.MasterConnectionURI))
 		return nil, err
 	}
 
@@ -38,6 +40,16 @@ func ProvideDB(dbparams DatabaseParams, logger *zap.Logger) (*gorm.DB, error) {
 		Policy:   dbresolver.RandomPolicy{},
 	}))
 	return db, nil
+}
+
+func ProvideGormConfig() *gorm.Config {
+	var config *gorm.Config
+	if os.Getenv("ENVIRONMENT") == "production" {
+		config = &gorm.Config{}
+	} else {
+		config = &gorm.Config{Logger: logger.Default.LogMode(logger.Info)}
+	}
+	return config
 }
 
 func ProvideDBParams() DatabaseParams {

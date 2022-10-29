@@ -24,23 +24,8 @@ func (clientRepository ClientRepository) GetClientByInn(inn string) (database_la
 	return client, nil
 }
 
-func (clientRepository ClientRepository) UpdateClient(oldInn string, client database_layer.Client) error {
-	clientRepository.GetDB().Exec(
-		"UPDATE client SET registration_address = @registration_address, residential_address = @residential_address, client_type = @client_type, ogrn = @ogrn, inn = @inn, kpp = @kpp WHERE inn = @old_inn",
-		sql.Named("registration_address", client.RegistrationAddress),
-		sql.Named("residential_address", client.ResidentialAddress),
-		sql.Named("client_type", client.ClientType),
-		sql.Named("ogrn", client.Ogrn),
-		sql.Named("inn", client.Inn),
-		sql.Named("kpp", client.Kpp),
-		sql.Named("old_inn", oldInn),
-	)
-
-	return nil
-}
-
-func (clientRepository ClientRepository) AddNewClient(client database_layer.Client) error {
-	clientRepository.GetDB().Create(&client)
+func (clientRepository ClientRepository) UpdateClient(client database_layer.Client) error {
+	clientRepository.GetDB().Save(&client)
 	return nil
 }
 
