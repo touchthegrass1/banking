@@ -11,42 +11,109 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
+	"github.com/dopefresh/banking/golang/banking/src/models"
+	"github.com/dopefresh/banking/golang/banking/src/services"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
-// AddClient - Add a new client
-func AddClient(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{})
-}
-
-// DepositMoney - Deposit money on client card
-func DepositMoney(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{})
+type ClientHandler struct {
+	ClientService services.ClientService
+	Log           *zap.Logger
 }
 
 // GetClient - get client by inn
-func GetClient(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{})
-}
-
-// GetJWT - Get a jwt token by providing phone and password
-func GetJWT(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{})
-}
-
-// TransferMoney - Transfer money to another client
-func TransferMoney(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{})
+func (handler ClientHandler) GetClient(c *gin.Context) {
+	inn := c.Param("inn")
+	client, err := handler.ClientService.GetClientByInn(inn)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		handler.Log.Error("Client not found", zap.Error(err))
+		c.JSON(http.StatusNotFound, "Client not found")
+	}
+	c.JSON(http.StatusOK, client)
 }
 
 // UpdateClient - Update an existing client
-func UpdateClient(c *gin.Context) {
+func (clientHandler ClientHandler) UpdateClient(c *gin.Context) {
+	var client models.ClientUpdate
+	inn := c.Param("inn")
+	err := c.Bind(&client)
+
+	if err != nil {
+		clientHandler.Log.Error("Error binding request data to models.ClientUpdate", zap.Error(err))
+		c.JSON(http.StatusBadRequest, "Validation Exception")
+	}
+
+	err = clientHandler.ClientService.UpdateClientByInn(inn, client)
+	if err != nil {
+		clientHandler.Log.Error("Error when updating client", zap.Error(err))
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, "Client not found")
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+// DepositoMoney - Deposit money to Client's card
+func (handler ClientHandler) DepositMoney(c *gin.Context) {
+	var deposit models.Deposit
+	err := c.Bind(&deposit)
+
+	if err != nil {
+		handler.Log.Error("Error binding request data to models.Deposit")
+		c.JSON(http.StatusBadRequest, "Validation Exception")
+	}
+	err = handler.ClientService.DepositMoney(deposit)
+
+	if err != nil {
+		handler.Log.Error("Error in handler deposit money", zap.Error(err))
+		if errors.Is(err, gorm.ErrInvalidTransaction) {
+			c.JSON(http.StatusBadRequest, "Invalid Transaction")
+		}
+	}
 	c.JSON(http.StatusOK, gin.H{})
 }
 
 // WithdrawMoney - Withdraw money from client
-func WithdrawMoney(c *gin.Context) {
+func (handler ClientHandler) WithdrawMoney(c *gin.Context) {
+	var withdraw models.Withdraw
+	err := c.Bind(&withdraw)
+	if err != nil {
+		handler.Log.Error("Error binding request data to models.Withdraw", zap.Error(err))
+		c.JSON(http.StatusBadRequest, "Validation Exception")
+	}
+	err = handler.ClientService.WithdrawMoney(withdraw)
+
+	if err != nil {
+		handler.Log.Error("Error in handler withdraw money", zap.Error(err))
+		if errors.Is(err, gorm.ErrInvalidTransaction) {
+			c.JSON(http.StatusBadRequest, "Invalid Transaction")
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+// TransferMoney - Transfer money to another client
+func (clientHandler ClientHandler) TransferMoney(c *gin.Context) {
+	var transfer models.Transfer
+	err := c.Bind(&transfer)
+
+	if err != nil {
+		clientHandler.Log.Error("Error binding request data to models.Transfer", zap.Error(err))
+		c.JSON(http.StatusBadRequest, "Validation Exception")
+	}
+
+	err = clientHandler.ClientService.TransferMoney(transfer)
+	if err != nil {
+		clientHandler.Log.Error("Error in handler transfering money", zap.Error(err))
+		if errors.Is(err, gorm.ErrInvalidTransaction) {
+			c.JSON(http.StatusBadRequest, "Invalid Transaction")
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{})
 }

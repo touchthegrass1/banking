@@ -11,7 +11,6 @@
 package models
 
 type PaymentSchedule struct {
-
 	PaymentScheduleId int64 `json:"paymentScheduleId,omitempty"`
 
 	TotalSum float64 `json:"totalSum,omitempty"`

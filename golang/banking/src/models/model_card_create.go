@@ -11,7 +11,6 @@
 package models
 
 type CardCreate struct {
-
 	Balance float64 `json:"balance,omitempty"`
 
 	ValidTo string `json:"validTo,omitempty"`

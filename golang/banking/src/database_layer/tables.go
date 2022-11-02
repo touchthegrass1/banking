@@ -55,8 +55,8 @@ type Client struct {
 }
 
 type Card struct {
-	CardId   string `gorm:"primaryKey"`
-	Balance  decimal.Decimal
+	CardId   string          `gorm:"primaryKey"`
+	Balance  decimal.Decimal `sql:"type:numeric(12,2)"`
 	ValidTo  time.Time
 	CvcCode  string
 	CardType CardType `gorm:"type:card_type"`
@@ -75,9 +75,9 @@ type Contract struct {
 }
 
 type Credit struct {
-	CreditID       string `gorm:"primaryKey"`
-	Summ           decimal.Decimal
-	Percent        decimal.Decimal
+	CreditID       string          `gorm:"primaryKey"`
+	Summ           decimal.Decimal `sql:"type:numeric(12,2)"`
+	Percent        decimal.Decimal `sql:"type:numeric(4,2)"`
 	ConclusionDate time.Time
 	EndDate        time.Time
 	ContractId     int64
@@ -85,12 +85,12 @@ type Credit struct {
 }
 
 type PaymentSchedule struct {
-	PaymentScheduleID      int64 `gorm:"primaryKey"`
-	TotalSum               decimal.Decimal
+	PaymentScheduleID      int64           `gorm:"primaryKey"`
+	TotalSum               decimal.Decimal `sql:"type:numeric(12,2)"`
 	Currency               string
-	Commission             decimal.Decimal
-	RepaymentOfInterestSum decimal.Decimal
-	SumRepaymentLoanPart   decimal.Decimal
+	Commission             decimal.Decimal `sql:"type:numeric(4,2)"`
+	RepaymentOfInterestSum decimal.Decimal `sql:"type:numeric(12,2)"`
+	SumRepaymentLoanPart   decimal.Decimal `sql:"type:numeric(12,2)"`
 	DateBegin              time.Time
 	DateEnd                time.Time
 	ContractID             int64
@@ -100,9 +100,10 @@ type PaymentSchedule struct {
 type Transaction struct {
 	TransactionID   int64           `gorm:"primaryKey"`
 	TransactionType TransactionType `gorm:"type:transaction_type"`
-	CardFromId      int64           `gorm:"foreignKey:card_from_id`
-	CardToId        int64           `gorm:"foreignKey:card_to_id`
-	CardId          int64           `gorm:"foreignKey:card_id"`
+	CardFromId      string          `gorm:"default:null"`
+	CardToId        string          `gorm:"default:null"`
+	CardId          string          `gorm:"default:null"`
+	Summ            decimal.Decimal `sql:"type:numeric(12,2)"`
 }
 
 func (User) TableName() string {

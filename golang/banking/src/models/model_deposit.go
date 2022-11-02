@@ -10,9 +10,10 @@
 
 package models
 
-type Deposit struct {
+import "github.com/shopspring/decimal"
 
+type Deposit struct {
 	CardId string `json:"cardId,omitempty"`
 
-	Summ float64 `json:"summ,omitempty"`
+	Summ decimal.Decimal `json:"summ,omitempty"`
 }

@@ -34,7 +34,14 @@
             <sqlCheck expectedResult="banking_test_db">SELECT current_database();</sqlCheck>
         </preConditions>
         <sqlFile endDelimiter=";;" path="../code/truncate_tables.sql" relativeToChangelogFile="true" dbms="postgresql" encoding="utf-8"/>
-        <rollback>DROP FUNCTION IF EXISTS f_truncate_tables</rollback>
+        <rollback>DROP FUNCTION IF EXISTS f_truncate_tables;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="9setup_test_data" runOnChange="true">
+        <preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="banking_test_db">SELECT current_database();</sqlCheck>
+        </preConditions>
+        <sqlFile endDelimiter=";;" path="../code/setup_test_data.sql" relativeToChangelogFile="true" dbms="postgresql" encoding="utf-8"/>
+        <rollback>DROP PROCEDURE IF EXISTS p_setup_test_data;</rollback>
     </changeSet>
 
 </databaseChangeLog>

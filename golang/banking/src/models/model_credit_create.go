@@ -11,7 +11,6 @@
 package models
 
 type CreditCreate struct {
-
 	Summ float64 `json:"summ,omitempty"`
 
 	Percent float64 `json:"percent,omitempty"`

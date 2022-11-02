@@ -11,7 +11,6 @@
 package models
 
 type Contract struct {
-
 	ContractId int64 `json:"contractId,omitempty"`
 
 	ContractType string `json:"contractType,omitempty"`

@@ -13,7 +13,7 @@ package src
 import (
 	"net/http"
 
-	"github.com/dopefresh/banking/golang/banking/src/handlers"
+	"github.com/dopefresh/banking/golang/banking/src/di"
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,7 +35,8 @@ type Routes []Route
 // NewRouter returns a new router.
 func NewRouter() *gin.Engine {
 	router := gin.Default()
-	for _, route := range routes {
+	router.Use(gin.Recovery())
+	for _, route := range GetRoutes() {
 		switch route.Method {
 		case http.MethodGet:
 			router.GET(route.Pattern, route.HandlerFunc)
@@ -58,158 +59,94 @@ func Index(c *gin.Context) {
 	c.String(http.StatusOK, "Hello World!")
 }
 
-var routes = Routes{
-	{
-		"Index",
-		http.MethodGet,
-		"/",
-		Index,
-	},
+func GetRoutes() Routes {
+	container := di.Container{}
+	clientHandler := container.GetClientHandler()
+	cardCRUDHandler := container.GetCardHandler()
+	transactionHandler := container.GetTransactionHandler()
+	return Routes{
+		{
+			"Index",
+			http.MethodGet,
+			"/",
+			Index,
+		},
 
-	{
-		"AddCard",
-		http.MethodPost,
-		"/api/v1/cards",
-		handlers.AddCard,
-	},
+		{
+			"AddCard",
+			http.MethodPost,
+			"/api/v1/cards",
+			cardCRUDHandler.AddCard,
+		},
 
-	{
-		"DeleteCard",
-		http.MethodDelete,
-		"/api/v1/cards/:number",
-		handlers.DeleteCard,
-	},
+		{
+			"GetCard",
+			http.MethodGet,
+			"/api/v1/cards/:number",
+			cardCRUDHandler.GetCard,
+		},
 
-	{
-		"GetCard",
-		http.MethodGet,
-		"/api/v1/cards/:number",
-		handlers.GetCard,
-	},
+		{
+			"UpdateCard",
+			http.MethodPut,
+			"/api/v1/cards/:number",
+			cardCRUDHandler.UpdateCard,
+		},
 
-	{
-		"UpdateCard",
-		http.MethodPut,
-		"/api/v1/cards/:number",
-		handlers.UpdateCard,
-	},
+		{
+			"DeleteCard",
+			http.MethodDelete,
+			"/api/v1/cards/:number",
+			cardCRUDHandler.DeleteCard,
+		},
 
-	{
-		"AddClient",
-		http.MethodPost,
-		"/api/v1/clients",
-		handlers.AddClient,
-	},
+		{
+			"GetClient",
+			http.MethodGet,
+			"/api/v1/clients/:inn",
+			clientHandler.GetClient,
+		},
 
-	{
-		"DepositMoney",
-		http.MethodPost,
-		"/api/v1/clients/deposit/",
-		handlers.DepositMoney,
-	},
+		{
+			"UpdateClient",
+			http.MethodPut,
+			"/api/v1/clients/:inn",
+			clientHandler.UpdateClient,
+		},
 
-	{
-		"GetClient",
-		http.MethodGet,
-		"/api/v1/clients/:inn",
-		handlers.GetClient,
-	},
+		{
+			"DepositMoney",
+			http.MethodPost,
+			"/api/v1/clients/deposit/",
+			clientHandler.DepositMoney,
+		},
 
-	{
-		"GetJWT",
-		http.MethodPost,
-		"/api/v1/token/",
-		handlers.GetJWT,
-	},
+		{
+			"WithdrawMoney",
+			http.MethodPost,
+			"/api/v1/clients/withdraw/",
+			clientHandler.WithdrawMoney,
+		},
 
-	{
-		"TransferMoney",
-		http.MethodPost,
-		"/api/v1/clients/transfer/",
-		handlers.TransferMoney,
-	},
+		{
+			"TransferMoney",
+			http.MethodPost,
+			"/api/v1/clients/transfer/",
+			clientHandler.TransferMoney,
+		},
 
-	{
-		"UpdateClient",
-		http.MethodPut,
-		"/api/v1/clients/:inn",
-		handlers.UpdateClient,
-	},
+		{
+			"GetTransaction",
+			http.MethodGet,
+			"/api/v1/transactions/:transactionId/",
+			transactionHandler.GetTransaction,
+		},
 
-	{
-		"WithdrawMoney",
-		http.MethodPost,
-		"/api/v1/clients/withdraw/",
-		handlers.WithdrawMoney,
-	},
-
-	{
-		"AddContract",
-		http.MethodPost,
-		"/api/v1/contracts/",
-		handlers.AddContract,
-	},
-
-	{
-		"GetContract",
-		http.MethodGet,
-		"/api/v1/contracts/:contractId",
-		handlers.GetContract,
-	},
-
-	{
-		"GetContracts",
-		http.MethodGet,
-		"/api/v1/contracts/",
-		handlers.GetContracts,
-	},
-
-	{
-		"AddCredit",
-		http.MethodPost,
-		"/api/v1/credits/",
-		handlers.AddCredit,
-	},
-
-	{
-		"GetCredit",
-		http.MethodGet,
-		"/api/v1/credits/:creditId",
-		handlers.GetCredit,
-	},
-
-	{
-		"GetCredits",
-		http.MethodGet,
-		"/api/v1/credits/",
-		handlers.GetCredits,
-	},
-
-	{
-		"GetPaymentSchedule",
-		http.MethodGet,
-		"/api/v1/credit/payment_schedules/:paymentScheduleId/",
-		handlers.GetPaymentSchedule,
-	},
-
-	{
-		"GetPaymentSchedules",
-		http.MethodGet,
-		"/api/v1/credit/payment_schedules/",
-		handlers.GetPaymentSchedules,
-	},
-
-	{
-		"GetTransaction",
-		http.MethodGet,
-		"/api/v1/transactions/:transactionId/",
-		handlers.GetTransaction,
-	},
-
-	{
-		"GetTransactions",
-		http.MethodGet,
-		"/api/v1/transactions/",
-		handlers.GetTransactions,
-	},
+		{
+			"GetTransactions",
+			http.MethodGet,
+			"/api/v1/transactions/",
+			transactionHandler.GetTransactions,
+		},
+	}
 }

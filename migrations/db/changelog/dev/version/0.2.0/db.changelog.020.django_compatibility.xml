@@ -178,4 +178,60 @@
         <sql dbms="postgresql" endDelimiter=";">ALTER TYPE transaction_type SET SCHEMA public</sql>
         <rollback>ALTER TYPE transaction_type SET SCHEMA banking;</rollback>
     </changeSet>
+    <changeSet author="vasilii" id="31">
+        <modifyDataType  columnName="balance"
+                         newDataType="NUMERIC(12,2)"
+                         schemaName="public"
+                         tableName="card"/>
+        <rollback>SELECT 1;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="32">
+        <modifyDataType  columnName="summ"
+                         newDataType="NUMERIC(12,2)"
+                         schemaName="public"
+                         tableName="credit"/>
+        <rollback>SELECT 1;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="33">
+        <modifyDataType  columnName="percent"
+                         newDataType="NUMERIC(4,2)"
+                         schemaName="public"
+                         tableName="credit"/>
+        <rollback>SELECT 1;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="34">
+        <modifyDataType  columnName="total_sum"
+                         newDataType="NUMERIC(12,2)"
+                         schemaName="public"
+                         tableName="payment_schedule"/>
+        <rollback>SELECT 1;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="35">
+        <modifyDataType  columnName="commission"
+                         newDataType="NUMERIC(4,2)"
+                         schemaName="public"
+                         tableName="payment_schedule"/>
+        <rollback>SELECT 1;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="36">
+        <modifyDataType  columnName="repayment_of_interest_sum"
+                         newDataType="NUMERIC(12,2)"
+                         schemaName="public"
+                         tableName="payment_schedule"/>
+        <rollback>SELECT 1;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="37">
+        <modifyDataType  columnName="sum_repayment_loan_part"
+                         newDataType="NUMERIC(12,2)"
+                         schemaName="public"
+                         tableName="payment_schedule"/>
+        <rollback>SELECT 1;</rollback>
+    </changeSet>
+    <changeSet author="vasilii" id="38">
+        <modifyDataType  columnName="summ"
+                         newDataType="NUMERIC(12,2)"
+                         schemaName="public"
+                         tableName="transaction"/>
+        <rollback>SELECT 1;</rollback>
+    </changeSet>
 </databaseChangeLog>

@@ -10,8 +10,7 @@
 
 package models
 
-type Client struct {
-	ClientId int64 `json:"clientId,omitempty"`
+type ClientUpdate struct {
 
 	// Client first name
 	FirstName string `json:"firstName,omitempty"`
@@ -27,13 +26,4 @@ type Client struct {
 	ResidentialAddress string `json:"residentialAddress,omitempty"`
 
 	ClientType string `json:"clientType,omitempty"`
-
-	// Main State registration number
-	Ogrn string `json:"ogrn,omitempty"`
-
-	// unique taxpayer identification number
-	Inn string `json:"inn,omitempty"`
-
-	// complements the inn
-	Kpp string `json:"kpp,omitempty"`
 }

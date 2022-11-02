@@ -13,25 +13,32 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/dopefresh/banking/golang/banking/src/services"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
+type CardHandler struct {
+	CardService services.CardService
+	Log         *zap.Logger
+}
+
 // AddCard - Add a new card
-func AddCard(c *gin.Context) {
+func (handler CardHandler) AddCard(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
 // DeleteCard - delete card by number
-func DeleteCard(c *gin.Context) {
+func (handler CardHandler) DeleteCard(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
 // GetCard - get card by number
-func GetCard(c *gin.Context) {
+func (handler CardHandler) GetCard(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
 // UpdateCard - Update an existing card
-func UpdateCard(c *gin.Context) {
+func (handler CardHandler) UpdateCard(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }

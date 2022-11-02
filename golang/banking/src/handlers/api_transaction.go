@@ -13,15 +13,22 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/dopefresh/banking/golang/banking/src/services"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
+type TransactionHandler struct {
+	Service services.TransactionService
+	Log     *zap.Logger
+}
+
 // GetTransaction - get transaction by id
-func GetTransaction(c *gin.Context) {
+func (handler TransactionHandler) GetTransaction(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
 // GetTransactions - get client's transactions
-func GetTransactions(c *gin.Context) {
+func (handler TransactionHandler) GetTransactions(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }

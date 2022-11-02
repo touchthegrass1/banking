@@ -11,7 +11,6 @@
 package models
 
 type CardUpdate struct {
-
 	ValidTo string `json:"validTo,omitempty"`
 
 	CvcCode string `json:"cvcCode,omitempty"`

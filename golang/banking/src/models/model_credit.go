@@ -11,7 +11,6 @@
 package models
 
 type Credit struct {
-
 	CreditId int64 `json:"creditId,omitempty"`
 
 	Summ float64 `json:"summ,omitempty"`

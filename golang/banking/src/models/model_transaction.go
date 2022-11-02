@@ -11,7 +11,6 @@
 package models
 
 type Transaction struct {
-
 	TransactionId int64 `json:"transactionId,omitempty"`
 
 	TransactionType string `json:"transactionType,omitempty"`

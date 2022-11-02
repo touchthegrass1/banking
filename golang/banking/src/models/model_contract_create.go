@@ -11,7 +11,6 @@
 package models
 
 type ContractCreate struct {
-
 	ContractType string `json:"contractType,omitempty"`
 
 	ConclusionDate string `json:"conclusionDate,omitempty"`

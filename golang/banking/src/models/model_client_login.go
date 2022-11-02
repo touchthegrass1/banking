@@ -11,7 +11,6 @@
 package models
 
 type ClientLogin struct {
-
 	Phone string `json:"phone,omitempty"`
 
 	Password string `json:"password,omitempty"`

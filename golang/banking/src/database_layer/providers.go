@@ -4,24 +4,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/dopefresh/banking/golang/banking/src/utils"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/plugin/dbresolver"
 )
-
-func InitializeDB() *gorm.DB {
-	log := utils.ProvideLogger()
-	dbparams := ProvideDBParams()
-	gormConfig := ProvideGormConfig()
-	database, err := ProvideDB(dbparams, log, gormConfig)
-	if err != nil {
-		panic(err)
-	}
-	return database
-}
 
 func ProvideDB(dbparams DatabaseParams, log *zap.Logger, gormConfig *gorm.Config) (*gorm.DB, error) {
 	db, err := gorm.Open(postgres.Open(dbparams.MasterConnectionURI), gormConfig)

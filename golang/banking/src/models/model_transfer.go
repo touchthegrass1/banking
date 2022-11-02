@@ -10,11 +10,12 @@
 
 package models
 
+import "github.com/shopspring/decimal"
+
 type Transfer struct {
+	CardFromId string `json:"cardFromId,omitempty"`
 
-	CardIdFrom string `json:"cardIdFrom,omitempty"`
+	CardToId string `json:"cardToId,omitempty"`
 
-	CardIdTo string `json:"cardIdTo,omitempty"`
-
-	Summ float64 `json:"summ,omitempty"`
+	Summ decimal.Decimal `json:"summ,omitempty"`
 }

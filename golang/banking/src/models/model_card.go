@@ -11,7 +11,6 @@
 package models
 
 type Card struct {
-
 	CardId int64 `json:"cardId,omitempty"`
 
 	Balance float64 `json:"balance,omitempty"`

@@ -12,8 +12,11 @@ package models
 
 type ClientCreateAndUpdate struct {
 
-	// Client full name
-	Name string `json:"name,omitempty"`
+	// Client first name
+	FirstName string `json:"firstName,omitempty"`
+
+	// Client last name
+	LastName string `json:"lastName,omitempty"`
 
 	Phone string `json:"phone,omitempty"`
 
