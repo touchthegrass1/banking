@@ -11,22 +11,14 @@
 package models
 
 type Client struct {
-	ClientId int64 `json:"clientId,omitempty"`
-
-	// Client first name
-	FirstName string `json:"firstName,omitempty"`
-
-	// Client last name
-	LastName string `json:"lastName,omitempty"`
-
-	Phone string `json:"phone,omitempty"`
+	ClientId int64 `json:"clientId,omitempty" gorm:"primaryKey"`
 
 	// Client registration address
 	RegistrationAddress string `json:"registrationAddress,omitempty"`
 
 	ResidentialAddress string `json:"residentialAddress,omitempty"`
 
-	ClientType string `json:"clientType,omitempty"`
+	ClientType ClientType `json:"clientType,omitempty" gorm:"type:client_type"`
 
 	// Main State registration number
 	Ogrn string `json:"ogrn,omitempty"`
@@ -36,4 +28,11 @@ type Client struct {
 
 	// complements the inn
 	Kpp string `json:"kpp,omitempty"`
+
+	UserId int64
+	Cards  []Card
+}
+
+func (Client) TableName() string {
+	return "client"
 }

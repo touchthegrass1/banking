@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/dopefresh/banking/golang/banking/src/database_layer"
 	"github.com/dopefresh/banking/golang/banking/src/di"
+	"github.com/dopefresh/banking/golang/banking/src/models"
 	"github.com/dopefresh/banking/golang/banking/src/repositories"
 	"github.com/dopefresh/banking/golang/banking/src/utils"
 	"github.com/stretchr/testify/assert"
@@ -16,8 +16,8 @@ type TransactionRepositoryTestSuite struct {
 	suite.Suite
 	clientRepository      repositories.ClientRepository
 	transactionRepository repositories.TransactionRepository
-	clients               []database_layer.Client
-	users                 []database_layer.User
+	clients               []models.Client
+	users                 []models.User
 }
 
 func TestTransactionRepositoryTestSuite(t *testing.T) {
@@ -42,8 +42,8 @@ func (suite *TransactionRepositoryTestSuite) setupData() {
 }
 
 func (suite *TransactionRepositoryTestSuite) TestTransactionRepositoryGetClientTransactions() {
-	var client database_layer.Client
-	err := suite.clientRepository.GetDB().Model(&database_layer.Client{}).Where("client_id = @clientId", sql.Named("clientId", 1)).Find(&client).Error
+	var client models.Client
+	err := suite.clientRepository.GetDB().Model(&models.Client{}).Where("client_id = @clientId", sql.Named("clientId", 1)).Find(&client).Error
 	assert.Nil(suite.T(), err)
 	transactions, err := suite.transactionRepository.GetClientTransactions(client.Inn)
 	assert.Nil(suite.T(), err)

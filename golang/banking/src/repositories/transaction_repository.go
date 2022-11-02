@@ -3,7 +3,7 @@ package repositories
 import (
 	"database/sql"
 
-	"github.com/dopefresh/banking/golang/banking/src/database_layer"
+	"github.com/dopefresh/banking/golang/banking/src/models"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -17,10 +17,10 @@ func (transactionRepository TransactionRepository) GetDB() *gorm.DB {
 	return transactionRepository.Db
 }
 
-func (transactionRepository TransactionRepository) GetClientTransactions(inn string) ([]database_layer.Transaction, error) {
+func (transactionRepository TransactionRepository) GetClientTransactions(inn string) ([]models.Transaction, error) {
 	db := transactionRepository.GetDB()
 	var cards []string
-	err := db.Model(&database_layer.Card{}).Where(
+	err := db.Model(&models.Card{}).Where(
 		"client_id = (?)",
 		db.Table("client").Where("inn = @inn", sql.Named("inn", inn)).Select("client_id"),
 	).Select("card_id").Find(&cards).Error
@@ -29,7 +29,7 @@ func (transactionRepository TransactionRepository) GetClientTransactions(inn str
 		return nil, err
 	}
 
-	var transactions []database_layer.Transaction
+	var transactions []models.Transaction
 	err = db.Where(
 		"card_from_id IN @cardIds OR card_to_id IN @cardIds OR card_id IN @cardIds",
 		sql.Named("cardIds", cards),

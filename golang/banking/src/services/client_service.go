@@ -1,7 +1,6 @@
 package services
 
 import (
-	"github.com/dopefresh/banking/golang/banking/src/database_layer"
 	"github.com/dopefresh/banking/golang/banking/src/models"
 	"github.com/dopefresh/banking/golang/banking/src/repositories"
 	"go.uber.org/zap"
@@ -12,7 +11,7 @@ type ClientService struct {
 	log        *zap.Logger
 }
 
-func (clientService ClientService) GetClientByInn(inn string) (database_layer.Client, error) {
+func (clientService ClientService) GetClientByInn(inn string) (models.Client, error) {
 	client, err := clientService.repository.GetClientByInn(inn)
 	return client, err
 }

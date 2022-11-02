@@ -10,18 +10,27 @@
 
 package models
 
+import (
+	"time"
+
+	"github.com/shopspring/decimal"
+)
+
 type Transaction struct {
-	TransactionId int64 `json:"transactionId,omitempty"`
+	TransactionId int64 `json:"transactionId,omitempty" gorm:"primaryKey"`
 
-	TransactionType string `json:"transactionType,omitempty"`
+	TransactionType TransactionType `json:"transactionType,omitempty" gorm:"type:transaction_type"`
 
-	CardIdFrom string `json:"cardIdFrom,omitempty"`
+	CardFromId string `json:"cardIdFrom,omitempty" gorm:"default:null"`
 
-	CardIdTo string `json:"cardIdTo,omitempty"`
+	CardToId string `json:"cardIdTo,omitempty" gorm:"default:null"`
+	CardId   string `json:"cardId,omitempty" gorm:"default:null"`
 
-	CardId string `json:"cardId,omitempty"`
+	Summ decimal.Decimal `json:"summ,omitempty" sql:"type:numeric(12,2)"`
 
-	Summ float64 `json:"summ,omitempty"`
+	TransactionDatetime time.Time `json:"transactionDatetime,omitempty" gorm:"default:null"`
+}
 
-	TransactionDatetime string `json:"transactionDatetime,omitempty"`
+func (Transaction) TableName() string {
+	return "transaction"
 }

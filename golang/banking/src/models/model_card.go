@@ -10,18 +10,30 @@
 
 package models
 
+import (
+	"time"
+
+	"github.com/shopspring/decimal"
+)
+
 type Card struct {
-	CardId int64 `json:"cardId,omitempty"`
+	CardId string `json:"cardId,omitempty" gorm:"primaryKey"`
 
-	Balance float64 `json:"balance,omitempty"`
+	Balance decimal.Decimal `json:"balance,omitempty" sql:"type:numeric(12,2)"`
 
-	ValidTo string `json:"validTo,omitempty"`
+	ValidTo time.Time `json:"validTo,omitempty"`
 
 	CvcCode string `json:"cvcCode,omitempty"`
 
-	CardType string `json:"cardType,omitempty"`
+	CardType CardType `json:"cardType,omitempty" gorm:"type:card_type"`
 
 	Currency string `json:"currency,omitempty"`
 
 	ClientId int64 `json:"clientId,omitempty"`
+
+	Client Client `gorm:"foreignKey:ClientId"`
+}
+
+func (Card) TableName() string {
+	return "card"
 }

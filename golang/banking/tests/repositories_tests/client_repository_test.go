@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/dopefresh/banking/golang/banking/src/database_layer"
 	"github.com/dopefresh/banking/golang/banking/src/di"
 	"github.com/dopefresh/banking/golang/banking/src/models"
 	"github.com/dopefresh/banking/golang/banking/src/repositories"
@@ -17,8 +16,8 @@ import (
 type ClientRepositoryTestSuite struct {
 	suite.Suite
 	clientRepository repositories.ClientRepository
-	clients          []database_layer.Client
-	users            []database_layer.User
+	clients          []models.Client
+	users            []models.User
 }
 
 func TestClientRepositoryTestSuite(t *testing.T) {
@@ -42,7 +41,7 @@ func (suite *ClientRepositoryTestSuite) setupData() {
 }
 
 func (suite *ClientRepositoryTestSuite) TestClientRepositoryGetClientByInn() {
-	var client database_layer.Client
+	var client models.Client
 	suite.clientRepository.GetDB().Take(&client)
 
 	foundClient, err := suite.clientRepository.GetClientByInn(client.Inn)
@@ -51,7 +50,7 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryGetClientByInn() {
 }
 
 func (suite *ClientRepositoryTestSuite) TestClientRepositoryUpdateClient() {
-	var client database_layer.Client
+	var client models.Client
 	suite.clientRepository.GetDB().Take(&client)
 	clientUpdate := models.ClientUpdate{
 		FirstName:           "Vasilii",
@@ -67,14 +66,14 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryUpdateClient() {
 	clientFound, err := suite.clientRepository.GetClientByInn(client.Inn)
 	assert.Equal(suite.T(), clientFound.RegistrationAddress, "Moscow, Lva Tolstogo 1")
 	assert.Equal(suite.T(), clientFound.ResidentialAddress, "Moscow, Lva Tolstogo 1")
-	assert.Equal(suite.T(), clientFound.ClientType, database_layer.ClientType("jp"))
+	assert.Equal(suite.T(), clientFound.ClientType, models.ClientType("jp"))
 }
 
 func (suite *ClientRepositoryTestSuite) TestClientRepositoryTransfer() {
-	var client1, client2 database_layer.Client
-	err := suite.clientRepository.GetDB().Model(&database_layer.Client{}).Preload("Cards").Where("client_id = @clientId", sql.Named("clientId", 1)).Find(&client1).Error
+	var client1, client2 models.Client
+	err := suite.clientRepository.GetDB().Model(&models.Client{}).Preload("Cards").Where("client_id = @clientId", sql.Named("clientId", 1)).Find(&client1).Error
 	assert.Nil(suite.T(), err)
-	err = suite.clientRepository.GetDB().Model(&database_layer.Client{}).Preload("Cards").Where("client_id = @clientId", sql.Named("clientId", 2)).Find(&client2).Error
+	err = suite.clientRepository.GetDB().Model(&models.Client{}).Preload("Cards").Where("client_id = @clientId", sql.Named("clientId", 2)).Find(&client2).Error
 	assert.Nil(suite.T(), err)
 
 	want := client1.Cards[0].Balance.Add(client2.Cards[0].Balance)
@@ -106,8 +105,8 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryTransfer() {
 }
 
 func (suite *ClientRepositoryTestSuite) TestClientRepositoryDeposit() {
-	var client database_layer.Client
-	err := suite.clientRepository.GetDB().Model(&database_layer.Client{}).Preload("Cards").Where("client_id = @clientId", sql.Named("clientId", 1)).Find(&client).Error
+	var client models.Client
+	err := suite.clientRepository.GetDB().Model(&models.Client{}).Preload("Cards").Where("client_id = @clientId", sql.Named("clientId", 1)).Find(&client).Error
 	assert.Nil(suite.T(), err)
 
 	deposit := models.Deposit{
@@ -124,8 +123,8 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryDeposit() {
 }
 
 func (suite *ClientRepositoryTestSuite) TestClientRepositoryWithdraw() {
-	var client database_layer.Client
-	err := suite.clientRepository.GetDB().Model(&database_layer.Client{}).Preload("Cards").Where("client_id = @clientId", sql.Named("clientId", 1)).Find(&client).Error
+	var client models.Client
+	err := suite.clientRepository.GetDB().Model(&models.Client{}).Preload("Cards").Where("client_id = @clientId", sql.Named("clientId", 1)).Find(&client).Error
 	assert.Nil(suite.T(), err)
 
 	withdraw := models.Withdraw{
