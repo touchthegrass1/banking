@@ -21,9 +21,7 @@ class User(AbstractUser):
 
 
 class Client(models.Model):
-    client_id = models.BigIntegerField(primary_key=True)
-    name = models.CharField(max_length=50)
-    phone = models.CharField(max_length=12)
+    client_id = models.BigAutoField(primary_key=True)
     registration_address = models.CharField(max_length=300)
     residential_address = models.CharField(max_length=300)
     client_type = models.CharField(max_length=20)

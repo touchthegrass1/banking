@@ -6,6 +6,8 @@
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
 # Binaries for programs and plugins
+*private_key*
+*public_key*
 *.exe
 *.exe~
 *.dll
@@ -374,6 +376,7 @@ venv.bak/
 env.sh
 test.sh
 prod.sh
+dev.sh
 
 # Spyder project settings
 .spyderproject

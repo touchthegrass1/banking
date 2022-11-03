@@ -10,8 +10,14 @@
 
 package models
 
+import "time"
+
 type CardUpdate struct {
-	ValidTo string `json:"validTo,omitempty"`
+	ValidTo time.Time `json:"validTo,omitempty"`
 
 	CvcCode string `json:"cvcCode,omitempty"`
+}
+
+func (CardUpdate) TableName() string {
+	return "card"
 }

@@ -11,11 +11,14 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
+	"github.com/dopefresh/banking/golang/banking/src/models"
 	"github.com/dopefresh/banking/golang/banking/src/services"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 type CardHandler struct {
@@ -25,20 +28,66 @@ type CardHandler struct {
 
 // AddCard - Add a new card
 func (handler CardHandler) AddCard(c *gin.Context) {
+	var card models.Card
+	err := c.Bind(&card)
+	if err != nil {
+		handler.Log.Error("Error binding request data to models.Card", zap.Error(err))
+		c.JSON(http.StatusBadRequest, "Validation Exception")
+	}
+	err = handler.CardService.CreateCard(card)
+	if err != nil {
+		handler.Log.Error("Error when creating card", zap.Error(err))
+		c.JSON(http.StatusBadRequest, "Invalid transaction")
+	}
+	c.JSON(http.StatusCreated, gin.H{})
+}
+
+// GetCard - get card by number
+func (handler CardHandler) GetCard(c *gin.Context) {
+	cardNumber := c.Param("number")
+	card, err := handler.CardService.GetCardByNumber(cardNumber)
+
+	if err != nil {
+		handler.Log.Error("Error when getting card", zap.Error(err))
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, "Card not found")
+		}
+		c.JSON(http.StatusInternalServerError, "Some error")
+	}
+
+	c.JSON(http.StatusOK, card)
+}
+
+// UpdateCard - Update an existing card
+func (handler CardHandler) UpdateCard(c *gin.Context) {
+	var card models.CardUpdate
+	c.Bind(&card)
+
+	cardNumber := c.Param("number")
+	err := handler.CardService.UpdateCard(cardNumber, card)
+
+	if err != nil {
+		handler.Log.Error("Error when updating card", zap.Error(err))
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, "Card not found")
+		}
+		c.JSON(http.StatusInternalServerError, "Some error")
+	}
 	c.JSON(http.StatusOK, gin.H{})
 }
 
 // DeleteCard - delete card by number
 func (handler CardHandler) DeleteCard(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{})
-}
+	cardNumber := c.Param("number")
+	err := handler.CardService.DeleteCard(cardNumber)
 
-// GetCard - get card by number
-func (handler CardHandler) GetCard(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{})
-}
-
-// UpdateCard - Update an existing card
-func (handler CardHandler) UpdateCard(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{})
+	if err != nil {
+		handler.Log.Error("Error when deleting card", zap.Error(err))
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, "Card didn't exist")
+		}
+		c.JSON(http.StatusInternalServerError, "Some error")
+	}
+	c.JSON(http.StatusOK, "Deleted")
 }

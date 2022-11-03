@@ -64,6 +64,7 @@ func GetRoutes() Routes {
 	clientHandler := container.GetClientHandler()
 	cardCRUDHandler := container.GetCardHandler()
 	transactionHandler := container.GetTransactionHandler()
+
 	return Routes{
 		{
 			"Index",

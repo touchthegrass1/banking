@@ -1,12 +1,28 @@
+from django.db import transaction
 from rest_framework import serializers
 
-from ..models import Client, Card, Contract, Credit, PaymentSchedule
+from ..models import Client, Card, Contract, Credit, PaymentSchedule, User
 
 
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
-        fields = ['name', 'phone', 'registration_address', 'residential_address', 'client_type', 'inn', 'ogrn', 'kpp']
+        fields = ['registration_address', 'residential_address', 'client_type', 'inn', 'ogrn', 'kpp']
+
+
+class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
+    client = ClientSerializer()
+
+    class Meta:
+        model = User
+        exclude = ['is_staff', 'last_login', 'is_superuser', 'is_active', 'date_joined']
+
+    def create(self, validated_data):
+        client_data = validated_data.pop('client')
+        with transaction.atomic():
+            user = User.objects.create_user(**validated_data)
+            Client.objects.create(**client_data, user=user)
+            return user
 
 
 class CardSerializer(serializers.ModelSerializer):
