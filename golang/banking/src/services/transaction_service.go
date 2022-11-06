@@ -11,8 +11,8 @@ type TransactionService struct {
 	log        *zap.Logger
 }
 
-func (service TransactionService) GetClientTransactions(inn string) ([]models.Transaction, error) {
-	return service.repository.GetClientTransactions(inn)
+func (service TransactionService) GetClientTransactions(userId int64) ([]models.Transaction, error) {
+	return service.repository.GetClientTransactions(userId)
 }
 
 func (service TransactionService) GetTransactionById(transactionId int64) (models.Transaction, error) {

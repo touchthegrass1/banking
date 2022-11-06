@@ -1,8 +1,6 @@
 package repositories
 
 import (
-	"database/sql"
-
 	"github.com/dopefresh/banking/golang/banking/src/models"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -17,20 +15,20 @@ func (clientRepository ClientRepository) GetDB() *gorm.DB {
 	return clientRepository.Db
 }
 
-func (clientRepository ClientRepository) GetClientByInn(inn string) (models.Client, error) {
+func (clientRepository ClientRepository) GetClientByUserId(userId int64) (models.Client, error) {
 	var client models.Client
-	err := clientRepository.GetDB().Table("client").Where("inn = @inn", sql.Named("inn", inn)).Find(&client).Error
+	err := clientRepository.GetDB().Table("client").Where("user_id = ?", userId).Find(&client).Error
 	return client, err
 }
 
-func (clientRepository ClientRepository) GetClientByInnWithCards(inn string) (models.Client, error) {
+func (clientRepository ClientRepository) GetClientByUserIdWithCards(userId int64) (models.Client, error) {
 	var client models.Client
-	err := clientRepository.GetDB().Model(&models.Client{}).Preload("Cards").Where("inn = @inn", sql.Named("inn", inn)).Find(&client).Error
+	err := clientRepository.GetDB().Model(&models.Client{}).Preload("Cards").Where("user_id = ?", userId).Find(&client).Error
 	return client, err
 }
 
-func (clientRepository ClientRepository) UpdateClientByInn(inn string, client models.ClientUpdate) error {
-	return clientRepository.GetDB().Model(&models.Client{}).Where("inn = ?", inn).Updates(client).Error
+func (clientRepository ClientRepository) UpdateClientByUserId(userId int64, client models.ClientUpdate) error {
+	return clientRepository.GetDB().Model(&models.Client{}).Where("user_id = ?", userId).Updates(client).Error
 }
 
 func (clientRepository ClientRepository) TransferMoney(transfer models.Transfer) error {

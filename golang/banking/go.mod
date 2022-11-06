@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/gin-gonic/gin v1.8.1
-	github.com/lestrrat-go/jwx v1.2.25
+	github.com/go-playground/assert/v2 v2.0.1
 	github.com/lestrrat-go/jwx/v2 v2.0.6
 	github.com/shopspring/decimal v1.3.1
 	github.com/stretchr/testify v1.8.1
@@ -35,7 +35,6 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/lestrrat-go/backoff/v2 v2.0.8 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.1 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc v1.0.4 // indirect

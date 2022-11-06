@@ -1,0 +1,9 @@
+asgiref==3.5.2
+dependency-injector==4.40.0
+Django==4.1.2
+django-replicated==2.7
+djangorestframework==3.14.0
+psycopg2==2.9.4
+pytz==2022.4
+six==1.16.0
+sqlparse==0.4.3

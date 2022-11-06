@@ -44,7 +44,7 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryGetClientByInn() {
 	var client models.Client
 	suite.clientRepository.GetDB().Take(&client)
 
-	foundClient, err := suite.clientRepository.GetClientByInn(client.Inn)
+	foundClient, err := suite.clientRepository.GetClientByUserId(client.UserId)
 	assert.Nil(suite.T(), err)
 	assert.Equal(suite.T(), client, foundClient)
 }
@@ -60,10 +60,10 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryUpdateClient() {
 		ResidentialAddress:  "Moscow, Lva Tolstogo 1",
 		ClientType:          "jp",
 	}
-	err := suite.clientRepository.UpdateClientByInn(client.Inn, clientUpdate)
+	err := suite.clientRepository.UpdateClientByUserId(client.UserId, clientUpdate)
 	assert.Nil(suite.T(), err)
 
-	clientFound, err := suite.clientRepository.GetClientByInn(client.Inn)
+	clientFound, err := suite.clientRepository.GetClientByUserId(client.UserId)
 	assert.Equal(suite.T(), clientFound.RegistrationAddress, "Moscow, Lva Tolstogo 1")
 	assert.Equal(suite.T(), clientFound.ResidentialAddress, "Moscow, Lva Tolstogo 1")
 	assert.Equal(suite.T(), clientFound.ClientType, models.ClientType("jp"))
@@ -86,11 +86,11 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryTransfer() {
 	err = suite.clientRepository.TransferMoney(transfer1)
 	assert.Nil(suite.T(), err)
 
-	foundClient1, err := suite.clientRepository.GetClientByInnWithCards(client1.Inn)
+	foundClient1, err := suite.clientRepository.GetClientByUserIdWithCards(client1.UserId)
 	assert.Nil(suite.T(), err)
 
 	assert.Equal(suite.T(), 0, foundClient1.Cards[0].Balance.Cmp(decimal.NewFromFloat(0)))
-	foundClient2, err := suite.clientRepository.GetClientByInnWithCards(client2.Inn)
+	foundClient2, err := suite.clientRepository.GetClientByUserIdWithCards(client2.UserId)
 	assert.Nil(suite.T(), err)
 	assert.Equal(suite.T(), 0, foundClient2.Cards[0].Balance.Cmp(want))
 
@@ -117,7 +117,7 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryDeposit() {
 	err = suite.clientRepository.DepositMoney(deposit)
 	assert.Nil(suite.T(), err)
 
-	foundClient, err := suite.clientRepository.GetClientByInnWithCards(client.Inn)
+	foundClient, err := suite.clientRepository.GetClientByUserIdWithCards(client.UserId)
 	assert.Nil(suite.T(), err)
 	assert.Equal(suite.T(), want, foundClient.Cards[0].Balance)
 }
@@ -134,7 +134,7 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryWithdraw() {
 	err = suite.clientRepository.WithdrawMoney(withdraw)
 	assert.Nil(suite.T(), err)
 
-	foundClient, err := suite.clientRepository.GetClientByInnWithCards(client.Inn)
+	foundClient, err := suite.clientRepository.GetClientByUserIdWithCards(client.UserId)
 	assert.Nil(suite.T(), err)
 	assert.Equal(suite.T(), 0, foundClient.Cards[0].Balance.Cmp(decimal.NewFromFloat(0)))
 

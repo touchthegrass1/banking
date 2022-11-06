@@ -11,8 +11,8 @@ type CardService struct {
 	Log        *zap.Logger
 }
 
-func (service CardService) CreateCard(card models.Card) error {
-	return service.Repository.AddCard(card)
+func (service CardService) CreateCard(userId int64, card models.Card) error {
+	return service.Repository.AddCard(userId, card)
 }
 
 func (service CardService) GetCardByNumber(cardNumber string) (models.Card, error) {

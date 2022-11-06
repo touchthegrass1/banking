@@ -10,12 +10,18 @@ import (
 )
 
 type JWTService struct {
-	publicKey jwk.Key
+	PublicKey jwk.Key
 	Log       *zap.Logger
 }
 
 func (service JWTService) VerifyToken(request *http.Request) (jwt.Token, error) {
-	verifiedToken, err := jwt.ParseRequest(request, jwt.WithKey(jwa.RS512, service.publicKey))
+	verifiedToken, err := jwt.ParseRequest(
+		request,
+		jwt.WithKey(jwa.RS512, service.PublicKey),
+		jwt.WithVerify(true),
+		jwt.WithValidate(true),
+		jwt.WithHeaderKey("Authorization"),
+	)
 
 	if err != nil {
 		service.Log.Error("Error verifying jwt", zap.Error(err))

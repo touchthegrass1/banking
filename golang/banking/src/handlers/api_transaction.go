@@ -30,5 +30,6 @@ func (handler TransactionHandler) GetTransaction(c *gin.Context) {
 
 // GetTransactions - get client's transactions
 func (handler TransactionHandler) GetTransactions(c *gin.Context) {
+
 	c.JSON(http.StatusOK, gin.H{})
 }

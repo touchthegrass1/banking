@@ -45,7 +45,7 @@ func (suite *TransactionRepositoryTestSuite) TestTransactionRepositoryGetClientT
 	var client models.Client
 	err := suite.clientRepository.GetDB().Model(&models.Client{}).Where("client_id = @clientId", sql.Named("clientId", 1)).Find(&client).Error
 	assert.Nil(suite.T(), err)
-	transactions, err := suite.transactionRepository.GetClientTransactions(client.Inn)
+	transactions, err := suite.transactionRepository.GetClientTransactions(client.UserId)
 	assert.Nil(suite.T(), err)
 
 	assert.NotEmpty(suite.T(), transactions)

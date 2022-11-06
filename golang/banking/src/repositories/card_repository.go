@@ -15,13 +15,21 @@ func (repository CardRepository) GetDB() *gorm.DB {
 	return repository.Db
 }
 
-func (repository CardRepository) AddCard(card models.Card) error {
+func (repository CardRepository) AddCard(userId int64, card models.Card) error {
+	db := repository.GetDB()
+
+	var client models.Client
+	err := db.Model(&models.Client{}).Where("user_id = ?", userId).Select("client_id").First(&client).Error
+	if err != nil {
+		return err
+	}
+	card.ClientId = client.ClientId
 	return repository.GetDB().Create(&card).Error
 }
 
 func (repository CardRepository) GetCard(cardNumber string) (models.Card, error) {
 	var card models.Card
-	err := repository.GetDB().Where("card_id = ?", cardNumber).Find(&card).Error
+	err := repository.GetDB().Where("card_id = ?", cardNumber).First(&card).Error
 	return card, err
 }
 
@@ -31,6 +39,6 @@ func (repository CardRepository) UpdateCard(cardNumber string, card models.CardU
 }
 
 func (repository CardRepository) DeleteCard(cardNumber string) error {
-	err := repository.GetDB().Delete(&models.Card{}, cardNumber).Error
+	err := repository.GetDB().Where("card_id = ?", cardNumber).Delete(&models.Card{}).Error
 	return err
 }

@@ -22,14 +22,17 @@ import (
 )
 
 type ClientHandler struct {
-	ClientService services.ClientService
-	Log           *zap.Logger
+	ClientService         services.ClientService
+	cardPermissionService services.CardPermissionService
+	Log                   *zap.Logger
 }
 
 // GetClient - get client by inn
 func (handler ClientHandler) GetClient(c *gin.Context) {
-	inn := c.Param("inn")
-	client, err := handler.ClientService.GetClientByInn(inn)
+	userIdRaw, _ := c.Get("userId")
+	userId, _ := userIdRaw.(int64)
+
+	client, err := handler.ClientService.GetClientByUserId(userId)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		handler.Log.Error("Client not found", zap.Error(err))
 		c.JSON(http.StatusNotFound, "Client not found")
@@ -39,8 +42,10 @@ func (handler ClientHandler) GetClient(c *gin.Context) {
 
 // UpdateClient - Update an existing client
 func (clientHandler ClientHandler) UpdateClient(c *gin.Context) {
+	userIdRaw, _ := c.Get("userId")
+	userId, _ := userIdRaw.(int64)
+
 	var client models.ClientUpdate
-	inn := c.Param("inn")
 	err := c.Bind(&client)
 
 	if err != nil {
@@ -48,7 +53,7 @@ func (clientHandler ClientHandler) UpdateClient(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, "Validation Exception")
 	}
 
-	err = clientHandler.ClientService.UpdateClientByInn(inn, client)
+	err = clientHandler.ClientService.UpdateClientByUserId(userId, client)
 	if err != nil {
 		clientHandler.Log.Error("Error when updating client", zap.Error(err))
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -67,6 +72,16 @@ func (handler ClientHandler) DepositMoney(c *gin.Context) {
 		handler.Log.Error("Error binding request data to models.Deposit")
 		c.JSON(http.StatusBadRequest, "Validation Exception")
 	}
+
+	userIdRaw, _ := c.Get("userId")
+	userId, _ := userIdRaw.(int64)
+	canUse := handler.cardPermissionService.CheckCanUseCard(deposit.CardId, userId)
+
+	if !canUse {
+		c.JSON(http.StatusUnauthorized, "this card isn't your's!")
+		return
+	}
+
 	err = handler.ClientService.DepositMoney(deposit)
 
 	if err != nil {
@@ -86,6 +101,16 @@ func (handler ClientHandler) WithdrawMoney(c *gin.Context) {
 		handler.Log.Error("Error binding request data to models.Withdraw", zap.Error(err))
 		c.JSON(http.StatusBadRequest, "Validation Exception")
 	}
+
+	userIdRaw, _ := c.Get("userId")
+	userId, _ := userIdRaw.(int64)
+	canUse := handler.cardPermissionService.CheckCanUseCard(withdraw.CardId, userId)
+
+	if !canUse {
+		c.JSON(http.StatusUnauthorized, "this card isn't your's!")
+		return
+	}
+
 	err = handler.ClientService.WithdrawMoney(withdraw)
 
 	if err != nil {
@@ -105,6 +130,15 @@ func (clientHandler ClientHandler) TransferMoney(c *gin.Context) {
 	if err != nil {
 		clientHandler.Log.Error("Error binding request data to models.Transfer", zap.Error(err))
 		c.JSON(http.StatusBadRequest, "Validation Exception")
+	}
+
+	userIdRaw, _ := c.Get("userId")
+	userId, _ := userIdRaw.(int64)
+	canUse := clientHandler.cardPermissionService.CheckCanUseCard(transfer.CardFromId, userId)
+
+	if !canUse {
+		c.JSON(http.StatusUnauthorized, "this card isn't your's!")
+		return
 	}
 
 	err = clientHandler.ClientService.TransferMoney(transfer)

@@ -1,9 +1,13 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 import psycopg2
-from datetime import timedelta
+
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -135,22 +139,20 @@ REST_FRAMEWORK = {
     ]
 }
 
-with open('django_jwt_private_key', 'r', encoding='utf-8') as f:
-    SIGNING_KEY = f.read()
-
-with open('django_jwt_public_key.pub', 'r', encoding='utf-8') as f:
-    VERIFYING_KEY = f.read()
-
+pem_bytes = bytes(os.environ['DJANGO_JWT_PRIVATE_KEY'], 'utf-8')
+private_key = serialization.load_pem_private_key(
+    pem_bytes, password=None, backend=default_backend()
+)
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': False,
     'UPDATE_LAST_LOGIN': False,
 
     'ALGORITHM': 'RS512',
-    'SIGNING_KEY': SIGNING_KEY,
-    'VERIFYING_KEY': VERIFYING_KEY,
+    'SIGNING_KEY': private_key,
+    'VERIFYING_KEY': os.environ['DJANGO_JWT_PUBLIC_KEY'],
     'AUDIENCE': None,
     'ISSUER': None,
     'JWK_URL': None,

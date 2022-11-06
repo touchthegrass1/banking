@@ -18,6 +18,10 @@ func ProvideCardService(repository repositories.CardRepository, log *zap.Logger)
 	return CardService{repository, log}
 }
 
+func ProvideCardPermissionService(clientRepository repositories.ClientRepository, cardRepository repositories.CardRepository, log *zap.Logger) CardPermissionService {
+	return CardPermissionService{clientRepository, cardRepository, log}
+}
+
 func ProvideJWTService(publicKey string, log *zap.Logger) JWTService {
 	key, err := jwk.ParseKey([]byte(publicKey), jwk.WithPEM(true))
 	if err != nil {

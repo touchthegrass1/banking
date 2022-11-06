@@ -11,15 +11,21 @@
 package models
 
 type CardCreate struct {
-	Balance float64 `json:"balance,omitempty"`
+	CardId string `json:"cardId,omitempty" gorm:"primaryKey"`
+
+	Balance float64 `json:"balance,omitempty" sql:"type:numeric(12,2)"`
 
 	ValidTo string `json:"validTo,omitempty"`
 
 	CvcCode string `json:"cvcCode,omitempty"`
 
-	CardType string `json:"cardType,omitempty"`
+	CardType string `json:"cardType,omitempty" gorm:"type:card_type"`
 
 	Currency string `json:"currency,omitempty"`
 
 	ClientId int64 `json:"clientId,omitempty"`
+}
+
+func (CardCreate) TableName() string {
+	return "card"
 }

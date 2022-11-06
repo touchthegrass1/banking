@@ -18,12 +18,12 @@ func (transactionRepository TransactionRepository) GetDB() *gorm.DB {
 	return transactionRepository.Db
 }
 
-func (transactionRepository TransactionRepository) GetClientTransactions(inn string) ([]models.Transaction, error) {
+func (transactionRepository TransactionRepository) GetClientTransactions(userId int64) ([]models.Transaction, error) {
 	db := transactionRepository.GetDB()
 	var cards []string
 	err := db.Model(&models.Card{}).Where(
 		"client_id = (?)",
-		db.Table("client").Where("inn = @inn", sql.Named("inn", inn)).Select("client_id"),
+		db.Table("client").Where("userId = ?", userId).Select("client_id"),
 	).Select("card_id").Find(&cards).Error
 
 	if err != nil {

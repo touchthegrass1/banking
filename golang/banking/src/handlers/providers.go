@@ -5,14 +5,14 @@ import (
 	"go.uber.org/zap"
 )
 
-func ProvideClientHandler(clientService services.ClientService, log *zap.Logger) ClientHandler {
-	return ClientHandler{clientService, log}
+func ProvideClientHandler(clientService services.ClientService, cardPermissionService services.CardPermissionService, log *zap.Logger) ClientHandler {
+	return ClientHandler{clientService, cardPermissionService, log}
 }
 
 func ProvideTransactionHandler(transactionService services.TransactionService, log *zap.Logger) TransactionHandler {
 	return TransactionHandler{transactionService, log}
 }
 
-func ProvideCardHandler(service services.CardService, log *zap.Logger) CardHandler {
-	return CardHandler{service, log}
+func ProvideCardHandler(service services.CardService, cardPermissionService services.CardPermissionService, log *zap.Logger) CardHandler {
+	return CardHandler{service, cardPermissionService, log}
 }

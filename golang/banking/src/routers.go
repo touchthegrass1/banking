@@ -14,6 +14,9 @@ import (
 	"net/http"
 
 	"github.com/dopefresh/banking/golang/banking/src/di"
+	"github.com/dopefresh/banking/golang/banking/src/handlers"
+	"github.com/dopefresh/banking/golang/banking/src/middlewares"
+	"github.com/dopefresh/banking/golang/banking/src/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,9 +37,17 @@ type Routes []Route
 
 // NewRouter returns a new router.
 func NewRouter() *gin.Engine {
+	container := di.Container{}
+	clientHandler := container.GetClientHandler()
+	cardCRUDHandler := container.GetCardHandler()
+	transactionHandler := container.GetTransactionHandler()
+	jwtService := container.GetJWTService()
+
 	router := gin.Default()
 	router.Use(gin.Recovery())
-	for _, route := range GetRoutes() {
+	router.Use(middlewares.AuthMiddleware(utils.ProvideLogger(), jwtService))
+
+	for _, route := range GetRoutes(clientHandler, cardCRUDHandler, transactionHandler) {
 		switch route.Method {
 		case http.MethodGet:
 			router.GET(route.Pattern, route.HandlerFunc)
@@ -59,12 +70,7 @@ func Index(c *gin.Context) {
 	c.String(http.StatusOK, "Hello World!")
 }
 
-func GetRoutes() Routes {
-	container := di.Container{}
-	clientHandler := container.GetClientHandler()
-	cardCRUDHandler := container.GetCardHandler()
-	transactionHandler := container.GetTransactionHandler()
-
+func GetRoutes(clientHandler handlers.ClientHandler, cardCRUDHandler handlers.CardHandler, transactionHandler handlers.TransactionHandler) Routes {
 	return Routes{
 		{
 			"Index",
@@ -104,35 +110,35 @@ func GetRoutes() Routes {
 		{
 			"GetClient",
 			http.MethodGet,
-			"/api/v1/clients/:inn",
+			"/api/v1/client",
 			clientHandler.GetClient,
 		},
 
 		{
 			"UpdateClient",
 			http.MethodPut,
-			"/api/v1/clients/:inn",
+			"/api/v1/client",
 			clientHandler.UpdateClient,
 		},
 
 		{
 			"DepositMoney",
 			http.MethodPost,
-			"/api/v1/clients/deposit/",
+			"/api/v1/client/deposit/",
 			clientHandler.DepositMoney,
 		},
 
 		{
 			"WithdrawMoney",
 			http.MethodPost,
-			"/api/v1/clients/withdraw/",
+			"/api/v1/client/withdraw/",
 			clientHandler.WithdrawMoney,
 		},
 
 		{
 			"TransferMoney",
 			http.MethodPost,
-			"/api/v1/clients/transfer/",
+			"/api/v1/client/transfer/",
 			clientHandler.TransferMoney,
 		},
 

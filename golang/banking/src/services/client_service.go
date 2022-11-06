@@ -11,13 +11,13 @@ type ClientService struct {
 	log        *zap.Logger
 }
 
-func (clientService ClientService) GetClientByInn(inn string) (models.Client, error) {
-	client, err := clientService.repository.GetClientByInn(inn)
+func (clientService ClientService) GetClientByUserId(userId int64) (models.Client, error) {
+	client, err := clientService.repository.GetClientByUserId(userId)
 	return client, err
 }
 
-func (clientService ClientService) UpdateClientByInn(inn string, client models.ClientUpdate) error {
-	err := clientService.repository.UpdateClientByInn(inn, client)
+func (clientService ClientService) UpdateClientByUserId(userId int64, client models.ClientUpdate) error {
+	err := clientService.repository.UpdateClientByUserId(userId, client)
 	return err
 }
 

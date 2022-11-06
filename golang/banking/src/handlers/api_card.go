@@ -22,19 +22,23 @@ import (
 )
 
 type CardHandler struct {
-	CardService services.CardService
-	Log         *zap.Logger
+	CardService           services.CardService
+	cardPermissionService services.CardPermissionService
+	Log                   *zap.Logger
 }
 
 // AddCard - Add a new card
 func (handler CardHandler) AddCard(c *gin.Context) {
+	userIdRaw, _ := c.Get("userId")
+	userId, _ := userIdRaw.(int64)
+
 	var card models.Card
 	err := c.Bind(&card)
 	if err != nil {
 		handler.Log.Error("Error binding request data to models.Card", zap.Error(err))
 		c.JSON(http.StatusBadRequest, "Validation Exception")
 	}
-	err = handler.CardService.CreateCard(card)
+	err = handler.CardService.CreateCard(userId, card)
 	if err != nil {
 		handler.Log.Error("Error when creating card", zap.Error(err))
 		c.JSON(http.StatusBadRequest, "Invalid transaction")
@@ -44,7 +48,16 @@ func (handler CardHandler) AddCard(c *gin.Context) {
 
 // GetCard - get card by number
 func (handler CardHandler) GetCard(c *gin.Context) {
+	userIdRaw, _ := c.Get("userId")
+	userId, _ := userIdRaw.(int64)
 	cardNumber := c.Param("number")
+
+	canUse := handler.cardPermissionService.CheckCanUseCard(cardNumber, userId)
+	if !canUse {
+		c.JSON(http.StatusUnauthorized, "this card isn't your's!")
+		return
+	}
+
 	card, err := handler.CardService.GetCardByNumber(cardNumber)
 
 	if err != nil {
@@ -61,10 +74,23 @@ func (handler CardHandler) GetCard(c *gin.Context) {
 // UpdateCard - Update an existing card
 func (handler CardHandler) UpdateCard(c *gin.Context) {
 	var card models.CardUpdate
-	c.Bind(&card)
+	err := c.Bind(&card)
+	if err != nil {
+		handler.Log.Error("Error binding request data to models.CardUpdate", zap.Error(err))
+		c.JSON(http.StatusBadRequest, "Validation Exception")
+	}
 
+	userIdRaw, _ := c.Get("userId")
+	userId, _ := userIdRaw.(int64)
 	cardNumber := c.Param("number")
-	err := handler.CardService.UpdateCard(cardNumber, card)
+
+	canUse := handler.cardPermissionService.CheckCanUseCard(cardNumber, userId)
+	if !canUse {
+		c.JSON(http.StatusUnauthorized, "this card isn't yours!")
+		return
+	}
+
+	err = handler.CardService.UpdateCard(cardNumber, card)
 
 	if err != nil {
 		handler.Log.Error("Error when updating card", zap.Error(err))
@@ -79,7 +105,16 @@ func (handler CardHandler) UpdateCard(c *gin.Context) {
 
 // DeleteCard - delete card by number
 func (handler CardHandler) DeleteCard(c *gin.Context) {
+	userIdRaw, _ := c.Get("userId")
+	userId, _ := userIdRaw.(int64)
 	cardNumber := c.Param("number")
+
+	canUse := handler.cardPermissionService.CheckCanUseCard(cardNumber, userId)
+	if !canUse {
+		c.JSON(http.StatusUnauthorized, "this card isn't yours!")
+		return
+	}
+
 	err := handler.CardService.DeleteCard(cardNumber)
 
 	if err != nil {
