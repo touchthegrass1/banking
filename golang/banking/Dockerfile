@@ -1,14 +1,13 @@
-FROM golang:1.19 AS build
-WORKDIR /go/src
-COPY . ./banking
+FROM golang:1.19 as build
 
-ENV CGO_ENABLED=0
-RUN go get -d -v ./...
+WORKDIR /go/src/app
+COPY . .
 
-RUN go build -a -installsuffix cgo -o bankingapi .
+RUN go mod download
+RUN CGO_ENABLED=0 go build -o /go/bin/app
 
-FROM scratch AS runtime
-ENV GIN_MODE=release
-COPY --from=build /go/src/bankingapi ./
+# Now copy it into our base image.
+FROM gcr.io/distroless/static-debian11
+COPY --from=build /go/bin/app /
 EXPOSE 8080/tcp
-ENTRYPOINT ["./bankingapi"]
+CMD ["/app"]

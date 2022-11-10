@@ -37,17 +37,26 @@ type Routes []Route
 
 // NewRouter returns a new router.
 func NewRouter() *gin.Engine {
-	container := di.Container{}
-	clientHandler := container.GetClientHandler()
+	logger := utils.ProvideLogger()
+	container := di.Container{Log: logger}
+	kafkaProducer := container.GetKafkaProducer()
+	defer kafkaProducer.Close()
+	kafkaConsumer := container.GetKafkaConsumer()
+	defer kafkaConsumer.Close()
+
+	kafkaService := container.GetKafkaTransactionService()
+	clientHandler := container.GetClientHandler(kafkaService)
 	cardCRUDHandler := container.GetCardHandler()
 	transactionHandler := container.GetTransactionHandler()
+	kafkaHandler := container.GetKafkaHandler()
+
 	jwtService := container.GetJWTService()
 
 	router := gin.Default()
 	router.Use(gin.Recovery())
 	router.Use(middlewares.AuthMiddleware(utils.ProvideLogger(), jwtService))
 
-	for _, route := range GetRoutes(clientHandler, cardCRUDHandler, transactionHandler) {
+	for _, route := range GetRoutes(clientHandler, cardCRUDHandler, transactionHandler, kafkaHandler) {
 		switch route.Method {
 		case http.MethodGet:
 			router.GET(route.Pattern, route.HandlerFunc)
@@ -70,7 +79,7 @@ func Index(c *gin.Context) {
 	c.String(http.StatusOK, "Hello World!")
 }
 
-func GetRoutes(clientHandler handlers.ClientHandler, cardCRUDHandler handlers.CardHandler, transactionHandler handlers.TransactionHandler) Routes {
+func GetRoutes(clientHandler handlers.ClientHandler, cardCRUDHandler handlers.CardHandler, transactionHandler handlers.TransactionHandler, kafkaHandler handlers.KafkaHandler) Routes {
 	return Routes{
 		{
 			"Index",
@@ -154,6 +163,12 @@ func GetRoutes(clientHandler handlers.ClientHandler, cardCRUDHandler handlers.Ca
 			http.MethodGet,
 			"/api/v1/transactions/",
 			transactionHandler.GetTransactions,
+		},
+		{
+			"GetMessage",
+			http.MethodGet,
+			"/api/v1/kafka/readNextMessage/",
+			kafkaHandler.GetNextMessage,
 		},
 	}
 }

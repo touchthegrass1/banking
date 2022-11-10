@@ -31,3 +31,7 @@ func ProvideJWTService(publicKey string, log *zap.Logger) JWTService {
 	service := JWTService{key, log}
 	return service
 }
+
+func ProvideKafkaTransactionService(repository *repositories.KafkaTransactionRepository, log *zap.Logger) *KafkaTransactionService {
+	return &KafkaTransactionService{repository, log}
+}

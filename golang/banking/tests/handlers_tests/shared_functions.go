@@ -360,3 +360,30 @@ func withdraw(cardId string, sum int, token string) error {
 
 	return nil
 }
+
+func getTransactions(token string) ([]models.Transaction, error) {
+	url := "http://127.0.0.1:8080/api/v1/transactions/"
+	method := "GET"
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, nil)
+
+	if err != nil {
+		return []models.Transaction{}, err
+	}
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+
+	res, err := client.Do(req)
+	if err != nil {
+		return []models.Transaction{}, err
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return []models.Transaction{}, err
+	}
+	var transactions []models.Transaction
+	err = json.Unmarshal(body, &transactions)
+	return transactions, err
+}

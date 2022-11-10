@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/dopefresh/banking/golang/banking/src/di"
-	"github.com/dopefresh/banking/golang/banking/src/handlers"
+	"github.com/dopefresh/banking/golang/banking/src/utils"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -14,9 +14,8 @@ import (
 
 type ClientHandlerTestSuite struct {
 	suite.Suite
-	handler handlers.ClientHandler
-	db      *gorm.DB
-	tokens  Tokens
+	db     *gorm.DB
+	tokens Tokens
 }
 
 func TestClientHandlerTestSuite(t *testing.T) {
@@ -24,8 +23,8 @@ func TestClientHandlerTestSuite(t *testing.T) {
 }
 
 func (suite *ClientHandlerTestSuite) SetupSuite() {
-	container := di.Container{}
-	suite.handler = container.GetClientHandler()
+	logger := utils.ProvideLogger()
+	container := di.Container{Log: logger}
 	suite.db = container.GetDB()
 	suite.setupData()
 }

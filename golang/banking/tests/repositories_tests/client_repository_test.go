@@ -16,8 +16,6 @@ import (
 type ClientRepositoryTestSuite struct {
 	suite.Suite
 	clientRepository repositories.ClientRepository
-	clients          []models.Client
-	users            []models.User
 }
 
 func TestClientRepositoryTestSuite(t *testing.T) {
@@ -25,7 +23,8 @@ func TestClientRepositoryTestSuite(t *testing.T) {
 }
 
 func (suite *ClientRepositoryTestSuite) SetupSuite() {
-	container := di.Container{}
+	logger := utils.ProvideLogger()
+	container := di.Container{Log: logger}
 	db := container.GetDB()
 	log := utils.ProvideLogger()
 	suite.clientRepository = *repositories.ProvideClientRepository(db, log)
@@ -64,6 +63,7 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryUpdateClient() {
 	assert.Nil(suite.T(), err)
 
 	clientFound, err := suite.clientRepository.GetClientByUserId(client.UserId)
+	assert.Nil(suite.T(), err)
 	assert.Equal(suite.T(), clientFound.RegistrationAddress, "Moscow, Lva Tolstogo 1")
 	assert.Equal(suite.T(), clientFound.ResidentialAddress, "Moscow, Lva Tolstogo 1")
 	assert.Equal(suite.T(), clientFound.ClientType, models.ClientType("jp"))
@@ -83,7 +83,7 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryTransfer() {
 		CardToId:   client2.Cards[0].CardId,
 		Summ:       client1.Cards[0].Balance,
 	}
-	err = suite.clientRepository.TransferMoney(transfer1)
+	_, err = suite.clientRepository.TransferMoney(transfer1)
 	assert.Nil(suite.T(), err)
 
 	foundClient1, err := suite.clientRepository.GetClientByUserIdWithCards(client1.UserId)
@@ -100,8 +100,9 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryTransfer() {
 		Summ:       decimal.NewFromInt(1),
 	}
 
-	err = suite.clientRepository.TransferMoney(transfer2)
+	transactionId, err := suite.clientRepository.TransferMoney(transfer2)
 	assert.NotNil(suite.T(), err)
+	assert.NotEqual(suite.T(), 0, transactionId)
 }
 
 func (suite *ClientRepositoryTestSuite) TestClientRepositoryDeposit() {
@@ -114,8 +115,9 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryDeposit() {
 		Summ:   decimal.NewFromInt(100),
 	}
 	want := client.Cards[0].Balance.Add(decimal.NewFromInt(100))
-	err = suite.clientRepository.DepositMoney(deposit)
+	transactionId, err := suite.clientRepository.DepositMoney(deposit)
 	assert.Nil(suite.T(), err)
+	assert.NotEqual(suite.T(), 0, transactionId)
 
 	foundClient, err := suite.clientRepository.GetClientByUserIdWithCards(client.UserId)
 	assert.Nil(suite.T(), err)
@@ -131,8 +133,9 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryWithdraw() {
 		CardId: client.Cards[0].CardId,
 		Summ:   client.Cards[0].Balance,
 	}
-	err = suite.clientRepository.WithdrawMoney(withdraw)
+	transactionId, err := suite.clientRepository.WithdrawMoney(withdraw)
 	assert.Nil(suite.T(), err)
+	assert.NotEqual(suite.T(), 0, transactionId)
 
 	foundClient, err := suite.clientRepository.GetClientByUserIdWithCards(client.UserId)
 	assert.Nil(suite.T(), err)
@@ -142,6 +145,7 @@ func (suite *ClientRepositoryTestSuite) TestClientRepositoryWithdraw() {
 		CardId: client.Cards[0].CardId,
 		Summ:   decimal.NewFromInt(1),
 	}
-	err = suite.clientRepository.WithdrawMoney(withdraw2)
+	transactionId, err = suite.clientRepository.WithdrawMoney(withdraw2)
 	assert.NotNil(suite.T(), err)
+	assert.NotEqual(suite.T(), 0, transactionId)
 }

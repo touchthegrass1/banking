@@ -23,7 +23,7 @@ func (transactionRepository TransactionRepository) GetClientTransactions(userId 
 	var cards []string
 	err := db.Model(&models.Card{}).Where(
 		"client_id = (?)",
-		db.Table("client").Where("userId = ?", userId).Select("client_id"),
+		db.Table("client").Where("user_id = ?", userId).Select("client_id"),
 	).Select("card_id").Find(&cards).Error
 
 	if err != nil {
@@ -34,7 +34,7 @@ func (transactionRepository TransactionRepository) GetClientTransactions(userId 
 	err = db.Where(
 		"card_from_id IN @cardIds OR card_to_id IN @cardIds OR card_id IN @cardIds",
 		sql.Named("cardIds", cards),
-	).Find(&transactions).Error
+	).Order("transaction_id").Find(&transactions).Error
 
 	return transactions, err
 }

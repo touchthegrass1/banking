@@ -16,8 +16,6 @@ type TransactionRepositoryTestSuite struct {
 	suite.Suite
 	clientRepository      repositories.ClientRepository
 	transactionRepository repositories.TransactionRepository
-	clients               []models.Client
-	users                 []models.User
 }
 
 func TestTransactionRepositoryTestSuite(t *testing.T) {
@@ -25,7 +23,8 @@ func TestTransactionRepositoryTestSuite(t *testing.T) {
 }
 
 func (suite *TransactionRepositoryTestSuite) SetupSuite() {
-	container := di.Container{}
+	logger := utils.ProvideLogger()
+	container := di.Container{Log: logger}
 	db := container.GetDB()
 	log := utils.ProvideLogger()
 	suite.transactionRepository = *repositories.ProvideTransactionRepository(db, log)

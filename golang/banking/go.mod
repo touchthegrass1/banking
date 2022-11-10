@@ -14,8 +14,11 @@ require (
 	gorm.io/plugin/dbresolver v1.3.0
 )
 
+require github.com/stretchr/objx v0.5.0 // indirect
+
 require (
 	github.com/benbjohnson/clock v1.3.0 // indirect
+	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -41,7 +44,7 @@ require (
 	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

@@ -13,11 +13,13 @@ func AuthMiddleware(logger *zap.Logger, service services.JWTService) gin.Handler
 		token, err := service.VerifyToken(c.Request)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, "Bad jwt")
+			logger.Error("Bad jwt", zap.Error(err))
 			return
 		}
 		userId, exists := token.Get("user_id")
 		if !exists {
 			c.JSON(http.StatusUnauthorized, "User id somehow didn't appear in jwt")
+			logger.Error("Bad jwt", zap.Error(err))
 			return
 		}
 		userIdFloat, ok := userId.(float64)

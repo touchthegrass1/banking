@@ -30,6 +30,12 @@ func (handler TransactionHandler) GetTransaction(c *gin.Context) {
 
 // GetTransactions - get client's transactions
 func (handler TransactionHandler) GetTransactions(c *gin.Context) {
-
-	c.JSON(http.StatusOK, gin.H{})
+	userIdRaw, _ := c.Get("userId")
+	userId, _ := userIdRaw.(int64)
+	transactions, err := handler.Service.GetClientTransactions(userId)
+	if err != nil {
+		handler.Log.Error("Error occured", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, "Some error")
+	}
+	c.JSON(http.StatusOK, transactions)
 }

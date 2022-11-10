@@ -1,25 +1,33 @@
 package di
 
 import (
+	"bufio"
 	"os"
+	"strings"
 
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/dopefresh/banking/golang/banking/src/database_layer"
 	"github.com/dopefresh/banking/golang/banking/src/handlers"
 	"github.com/dopefresh/banking/golang/banking/src/repositories"
 	"github.com/dopefresh/banking/golang/banking/src/services"
 	"github.com/dopefresh/banking/golang/banking/src/utils"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 type Container struct {
-	db *gorm.DB
+	producer *kafka.Producer
+	consumer *kafka.Consumer
+	db       *gorm.DB
+	Log      *zap.Logger
 }
 
-func (container Container) GetClientHandler() handlers.ClientHandler {
+func (container Container) GetClientHandler(kafkaService services.KafkaService) handlers.ClientHandler {
 	service := container.GetClientService()
 	logger := utils.ProvideLogger()
 	cardPermissionService := container.GetCardPermissionService()
-	return handlers.ProvideClientHandler(service, cardPermissionService, logger)
+	transactionService := container.GetTransactionService()
+	return handlers.ProvideClientHandler(kafkaService, service, cardPermissionService, transactionService, logger)
 }
 
 func (container Container) GetCardHandler() handlers.CardHandler {
@@ -33,6 +41,18 @@ func (container Container) GetTransactionHandler() handlers.TransactionHandler {
 	service := container.GetTransactionService()
 	logger := utils.ProvideLogger()
 	return handlers.ProvideTransactionHandler(service, logger)
+}
+
+func (container Container) GetKafkaHandler() handlers.KafkaHandler {
+	consumer := container.GetKafkaConsumer()
+	logger := utils.ProvideLogger()
+	return handlers.ProvideKafkaHandler(consumer, logger)
+}
+
+func (container Container) GetKafkaTransactionService() services.KafkaTransactionService {
+	repository := container.GetKafkaTransactionRepository()
+	logger := utils.ProvideLogger()
+	return *services.ProvideKafkaTransactionService(&repository, logger)
 }
 
 func (container Container) GetJWTService() services.JWTService {
@@ -69,6 +89,12 @@ func (container Container) GetTransactionService() services.TransactionService {
 	return services.ProvideTransactionService(repository, logger)
 }
 
+func (container Container) GetKafkaTransactionRepository() repositories.KafkaTransactionRepository {
+	producer := container.GetKafkaProducer()
+	deliveryChan := make(chan kafka.Event, 10000)
+	return *repositories.ProvideKafkaTransactionRepository(producer, deliveryChan)
+}
+
 func (container Container) GetClientRepository() repositories.ClientRepository {
 	db := container.GetDB()
 	logger := utils.ProvideLogger()
@@ -100,4 +126,61 @@ func (container Container) GetDB() *gorm.DB {
 	}
 	container.db = database
 	return database
+}
+
+func (container Container) GetKafkaProducer() *kafka.Producer {
+	if container.producer != nil {
+		return container.producer
+	}
+	config := container.GetKafkaConfig()
+	producer, err := kafka.NewProducer(&config)
+	if err != nil {
+		panic(err)
+	}
+	go services.HandleKafkaEvents(producer, container.Log)
+	return producer
+}
+
+func (container Container) GetKafkaConsumer() *kafka.Consumer {
+	if container.consumer != nil {
+		return container.consumer
+	}
+	config := container.GetKafkaConfig()
+	config["auto.offset.reset"] = "earliest"
+	config["group.id"] = "test-consumer-group"
+
+	consumer, err := kafka.NewConsumer(&config)
+	if err != nil {
+		panic(err)
+	}
+	topic := "transactions"
+	err = consumer.SubscribeTopics([]string{topic}, nil)
+	if err != nil {
+		panic(err)
+	}
+	return consumer
+}
+
+func (container Container) GetKafkaConfig() kafka.ConfigMap {
+	m := make(map[string]kafka.ConfigValue)
+
+	file, err := os.Open("kafka.properties")
+	if err != nil {
+		container.Log.Error("Error getting kafka config", zap.Error(err))
+		os.Exit(1)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if strings.HasPrefix(line, "#") || len(line) == 0 {
+			continue
+		}
+		kv := strings.Split(line, "=")
+		key := strings.TrimSpace(kv[0])
+		value := strings.TrimSpace(kv[1])
+		m[key] = value
+	}
+	return m
 }

@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"fmt"
+
 	"github.com/dopefresh/banking/golang/banking/src/models"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -31,8 +33,10 @@ func (clientRepository ClientRepository) UpdateClientByUserId(userId int64, clie
 	return clientRepository.GetDB().Model(&models.Client{}).Where("user_id = ?", userId).Updates(client).Error
 }
 
-func (clientRepository ClientRepository) TransferMoney(transfer models.Transfer) error {
-	err := clientRepository.GetDB().Transaction(func(tx *gorm.DB) error {
+func (repository ClientRepository) TransferMoney(transfer models.Transfer) (int64, error) {
+	var transactionId int64 = 0
+
+	err := repository.GetDB().Transaction(func(tx *gorm.DB) error {
 		tx.Table("card").Where("card_id = ?", transfer.CardFromId).Update("balance", gorm.Expr("balance - ?", transfer.Summ))
 		tx.Table("card").Where("card_id = ?", transfer.CardToId).Update("balance", gorm.Expr("balance + ?", transfer.Summ))
 		transaction := models.Transaction{
@@ -41,36 +45,57 @@ func (clientRepository ClientRepository) TransferMoney(transfer models.Transfer)
 			CardToId:        transfer.CardToId,
 			Summ:            transfer.Summ,
 		}
-		tx.Create(&transaction)
+		result := tx.Create(&transaction)
+		if result.Error != nil {
+			repository.Log.Error("Error transferring money", zap.Error(result.Error))
+			return fmt.Errorf("error transferring money %v: %w", transaction, result.Error)
+		}
+		transactionId = transaction.TransactionId
 		return nil
 	})
-	return err
+	return transactionId, err
 }
 
-func (clientRepository ClientRepository) DepositMoney(deposit models.Deposit) error {
-	err := clientRepository.GetDB().Transaction(func(tx *gorm.DB) error {
+func (repository ClientRepository) DepositMoney(deposit models.Deposit) (int64, error) {
+	var transactionId int64 = 0
+
+	err := repository.GetDB().Transaction(func(tx *gorm.DB) error {
 		tx.Table("card").Where("card_id = ?", deposit.CardId).Update("balance", gorm.Expr("balance + ?", deposit.Summ))
 		transaction := models.Transaction{
 			TransactionType: "deposit",
 			CardId:          deposit.CardId,
 			Summ:            deposit.Summ,
 		}
-		tx.Create(&transaction)
+		result := tx.Create(&transaction)
+		if result.Error != nil {
+			repository.Log.Error("Error depositing money", zap.Error(result.Error))
+			return fmt.Errorf("error depositing money %v: %w", transaction, result.Error)
+		}
+		transactionId = transaction.TransactionId
 		return nil
 	})
-	return err
+	return transactionId, err
 }
 
-func (clientRepository ClientRepository) WithdrawMoney(withdraw models.Withdraw) error {
-	err := clientRepository.GetDB().Transaction(func(tx *gorm.DB) error {
+func (repository ClientRepository) WithdrawMoney(withdraw models.Withdraw) (int64, error) {
+	var transactionId int64 = 0
+
+	err := repository.GetDB().Transaction(func(tx *gorm.DB) error {
 		tx.Table("card").Where("card_id = ?", withdraw.CardId).Update("balance", gorm.Expr("balance - ?", withdraw.Summ))
 		transaction := models.Transaction{
 			TransactionType: "withdraw",
 			CardId:          withdraw.CardId,
 			Summ:            withdraw.Summ,
 		}
-		tx.Create(&transaction)
+		result := tx.Create(&transaction)
+
+		if result.Error != nil {
+			repository.Log.Error("Error money withdraw", zap.Error(result.Error))
+			return fmt.Errorf("error withdrawing money %v: %w", transaction, result.Error)
+		}
+
+		transactionId = transaction.TransactionId
 		return nil
 	})
-	return err
+	return transactionId, err
 }

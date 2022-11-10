@@ -27,7 +27,8 @@ func TestCardRepositoryTestSuite(t *testing.T) {
 }
 
 func (suite *CardRepositoryTestSuite) SetupSuite() {
-	container := di.Container{}
+	logger := utils.ProvideLogger()
+	container := di.Container{Log: logger}
 	db := container.GetDB()
 	log := utils.ProvideLogger()
 	suite.clientRepository = *repositories.ProvideClientRepository(db, log)

@@ -21,17 +21,17 @@ func (clientService ClientService) UpdateClientByUserId(userId int64, client mod
 	return err
 }
 
-func (service ClientService) DepositMoney(deposit models.Deposit) error {
-	err := service.repository.DepositMoney(deposit)
-	return err
+func (service ClientService) DepositMoney(deposit models.Deposit) (int64, error) {
+	transactionId, err := service.repository.DepositMoney(deposit)
+	return transactionId, err
 }
 
-func (service ClientService) WithdrawMoney(withdraw models.Withdraw) error {
-	err := service.repository.WithdrawMoney(withdraw)
-	return err
+func (service ClientService) WithdrawMoney(withdraw models.Withdraw) (int64, error) {
+	transactionId, err := service.repository.WithdrawMoney(withdraw)
+	return transactionId, err
 }
 
-func (clientService ClientService) TransferMoney(transfer models.Transfer) error {
-	err := clientService.repository.TransferMoney(transfer)
-	return err
+func (clientService ClientService) TransferMoney(transfer models.Transfer) (int64, error) {
+	transactionId, err := clientService.repository.TransferMoney(transfer)
+	return transactionId, err
 }

@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -15,4 +16,8 @@ func ProvideTransactionRepository(db *gorm.DB, log *zap.Logger) *TransactionRepo
 
 func ProvideCardRepository(db *gorm.DB, log *zap.Logger) *CardRepository {
 	return &CardRepository{Db: db, Log: log}
+}
+
+func ProvideKafkaTransactionRepository(producer *kafka.Producer, deliveryChan chan kafka.Event) *KafkaTransactionRepository {
+	return &KafkaTransactionRepository{producer, deliveryChan}
 }

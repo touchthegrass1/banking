@@ -22,9 +22,11 @@ import (
 )
 
 type ClientHandler struct {
-	ClientService         services.ClientService
-	cardPermissionService services.CardPermissionService
-	Log                   *zap.Logger
+	KafkaTransactionService services.KafkaService
+	ClientService           services.ClientService
+	cardPermissionService   services.CardPermissionService
+	transactionService      services.TransactionService
+	Log                     *zap.Logger
 }
 
 // GetClient - get client by inn
@@ -82,14 +84,24 @@ func (handler ClientHandler) DepositMoney(c *gin.Context) {
 		return
 	}
 
-	err = handler.ClientService.DepositMoney(deposit)
+	transactionId, err := handler.ClientService.DepositMoney(deposit)
 
 	if err != nil {
 		handler.Log.Error("Error in handler deposit money", zap.Error(err))
 		if errors.Is(err, gorm.ErrInvalidTransaction) {
 			c.JSON(http.StatusBadRequest, "Invalid Transaction")
 		}
+		c.JSON(http.StatusInternalServerError, "Some error")
 	}
+	transaction, err := handler.transactionService.GetTransactionById(transactionId)
+
+	if err != nil {
+		handler.Log.Error("Error getting transaction by transactionId", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, "Some error")
+	}
+
+	handler.KafkaTransactionService.SendMessage(transaction)
+
 	c.JSON(http.StatusOK, gin.H{})
 }
 
@@ -111,43 +123,62 @@ func (handler ClientHandler) WithdrawMoney(c *gin.Context) {
 		return
 	}
 
-	err = handler.ClientService.WithdrawMoney(withdraw)
+	transactionId, err := handler.ClientService.WithdrawMoney(withdraw)
 
 	if err != nil {
 		handler.Log.Error("Error in handler withdraw money", zap.Error(err))
 		if errors.Is(err, gorm.ErrInvalidTransaction) {
 			c.JSON(http.StatusBadRequest, "Invalid Transaction")
 		}
+		c.JSON(http.StatusInternalServerError, "Some error")
 	}
+	transaction, err := handler.transactionService.GetTransactionById(transactionId)
+
+	if err != nil {
+		handler.Log.Error("Error getting transaction by transactionId", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, "Some error")
+	}
+
+	handler.KafkaTransactionService.SendMessage(transaction)
+
 	c.JSON(http.StatusOK, gin.H{})
 }
 
 // TransferMoney - Transfer money to another client
-func (clientHandler ClientHandler) TransferMoney(c *gin.Context) {
+func (handler ClientHandler) TransferMoney(c *gin.Context) {
 	var transfer models.Transfer
 	err := c.Bind(&transfer)
 
 	if err != nil {
-		clientHandler.Log.Error("Error binding request data to models.Transfer", zap.Error(err))
+		handler.Log.Error("Error binding request data to models.Transfer", zap.Error(err))
 		c.JSON(http.StatusBadRequest, "Validation Exception")
 	}
 
 	userIdRaw, _ := c.Get("userId")
 	userId, _ := userIdRaw.(int64)
-	canUse := clientHandler.cardPermissionService.CheckCanUseCard(transfer.CardFromId, userId)
+	canUse := handler.cardPermissionService.CheckCanUseCard(transfer.CardFromId, userId)
 
 	if !canUse {
 		c.JSON(http.StatusUnauthorized, "this card isn't your's!")
 		return
 	}
 
-	err = clientHandler.ClientService.TransferMoney(transfer)
+	transactionId, err := handler.ClientService.TransferMoney(transfer)
 	if err != nil {
-		clientHandler.Log.Error("Error in handler transfering money", zap.Error(err))
+		handler.Log.Error("Error in handler transfering money", zap.Error(err))
 		if errors.Is(err, gorm.ErrInvalidTransaction) {
 			c.JSON(http.StatusBadRequest, "Invalid Transaction")
 		}
+		c.JSON(http.StatusInternalServerError, "Some error")
 	}
+	transaction, err := handler.transactionService.GetTransactionById(transactionId)
+
+	if err != nil {
+		handler.Log.Error("Error getting transaction by transactionId", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, "Some error")
+	}
+
+	handler.KafkaTransactionService.SendMessage(transaction)
 
 	c.JSON(http.StatusOK, gin.H{})
 }
