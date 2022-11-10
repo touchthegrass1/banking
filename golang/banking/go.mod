@@ -4,7 +4,6 @@ go 1.19
 
 require (
 	github.com/gin-gonic/gin v1.8.1
-	github.com/go-playground/assert/v2 v2.0.1
 	github.com/lestrrat-go/jwx/v2 v2.0.6
 	github.com/shopspring/decimal v1.3.1
 	github.com/stretchr/testify v1.8.1
@@ -13,8 +12,6 @@ require (
 	gorm.io/gorm v1.24.1-0.20221019064659-5dd2bb482755
 	gorm.io/plugin/dbresolver v1.3.0
 )
-
-require github.com/stretchr/objx v0.5.0 // indirect
 
 require (
 	github.com/benbjohnson/clock v1.3.0 // indirect
