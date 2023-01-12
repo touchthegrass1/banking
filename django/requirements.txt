@@ -1,7 +1,7 @@
 asgiref==3.5.2
 cffi==1.15.1
 cryptography==38.0.3
-Django==4.1.2
+Django==3.2
 django-replicated==2.7
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2

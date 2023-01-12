@@ -163,19 +163,19 @@
         <rollback>SELECT 1;</rollback>
     </changeSet>
     <changeSet author="vasilii" id="27">
-        <sql dbms="postgresql" endDelimiter=";">ALTER TYPE card_type SET SCHEMA public</sql>
+        <sql dbms="postgresql" endDelimiter=";">ALTER TYPE banking.card_type SET SCHEMA public</sql>
         <rollback>ALTER TYPE card_type SET SCHEMA banking;</rollback>
     </changeSet>
     <changeSet author="vasilii" id="28">
-        <sql dbms="postgresql" endDelimiter=";">ALTER TYPE client_type SET SCHEMA public</sql>
+        <sql dbms="postgresql" endDelimiter=";">ALTER TYPE banking.client_type SET SCHEMA public</sql>
         <rollback>ALTER TYPE client_type SET SCHEMA banking;</rollback>
     </changeSet>
     <changeSet author="vasilii" id="29">
-        <sql dbms="postgresql" endDelimiter=";">ALTER TYPE contract_type SET SCHEMA public</sql>
+        <sql dbms="postgresql" endDelimiter=";">ALTER TYPE banking.contract_type SET SCHEMA public</sql>
         <rollback>ALTER TYPE contract_type SET SCHEMA banking;</rollback>
     </changeSet>
     <changeSet author="vasilii" id="30">
-        <sql dbms="postgresql" endDelimiter=";">ALTER TYPE transaction_type SET SCHEMA public</sql>
+        <sql dbms="postgresql" endDelimiter=";">ALTER TYPE banking.transaction_type SET SCHEMA public</sql>
         <rollback>ALTER TYPE transaction_type SET SCHEMA banking;</rollback>
     </changeSet>
     <changeSet author="vasilii" id="31">

@@ -96,7 +96,7 @@
             <column name="phone" type="VARCHAR(12)"/>
             <column name="registration_address" type="VARCHAR(300)"/>
             <column name="residential_address" type="VARCHAR(300)"/>
-            <column name="client_type" type="CLIENT_TYPE"/>
+            <column name="client_type" type="BANKING.CLIENT_TYPE"/>
             <column name="ogrn" type="INTEGER"/>
             <column name="inn" type="INTEGER"/>
             <column name="kpp" type="INTEGER"/>
@@ -112,7 +112,7 @@
             </column>
             <column name="valid_to" type="TIMESTAMP WITHOUT TIME ZONE"/>
             <column name="cvc_code" type="VARCHAR(3)"/>
-            <column name="card_type" type="CARD_TYPE"/>
+            <column name="card_type" type="BANKING.CARD_TYPE"/>
             <column name="currency" type="VARCHAR(3)"/>
             <column name="client_id" type="BIGINT"/>
         </createTable>
@@ -122,7 +122,7 @@
             <column autoIncrement="true" name="contract_id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="contract_pkey"/>
             </column>
-            <column name="contract_type" type="CONTRACT_TYPE">
+            <column name="contract_type" type="BANKING.CONTRACT_TYPE">
                 <constraints nullable="false"/>
             </column>
             <column name="conclusion_date" type="date"/>
